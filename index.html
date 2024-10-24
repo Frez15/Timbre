@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timbre Rivera Indarte 242 PB A</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+        }
+        .container {
+            text-align: center;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        p {
+            font-size: 18px;
+            color: #555;
+            margin-bottom: 20px;
+        }
+        #botonTimbre {
+            font-size: 20px;
+            padding: 15px 30px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        #botonTimbre:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        #mensaje {
+            margin-top: 20px;
+            font-size: 16px;
+            color: #d9534f;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Timbre Rivera Indarte 242 PB A</h1>
+        <p>Presioná el botón para tocar el timbre.</p>
+        <button id="botonTimbre" onclick="tocarTimbre()">TOCAR</button>
+        <p id="mensaje"></p>
+    </div>
+
+    <script>
+        let vecesTocado = 0;
+        let ultimaVezTocado = 0;
+
+        function tocarTimbre() {
+            const boton = document.getElementById('botonTimbre');
+            const mensaje = document.getElementById('mensaje');
+            const ahora = Date.now();
+
+            // Permitir máximo 2 toques cada 5 minutos (300000 milisegundos)
+            if (vecesTocado < 2 || (ahora - ultimaVezTocado) > 300000) {
+                vecesTocado++;
+                ultimaVezTocado = ahora;
+                boton.disabled = true;
+                boton.innerText = 'TOCADO';
+                mensaje.innerText = '';
+
+                // Rehabilitar el botón después de 5 minutos
+                setTimeout(() => {
+                    vecesTocado = 0;
+                    boton.disabled = false;
+                    boton.innerText = 'TOCAR';
+                }, 300000); // 5 minutos
+
+                // Aquí va el código para activar el timbre y backend
+                console.log('Timbre tocado');
+            } else {
+                mensaje.innerText = 'Has tocado el timbre demasiadas veces. Espera 5 minutos.';
+            }
+        }
+    </script>
+
+</body>
+</html>
