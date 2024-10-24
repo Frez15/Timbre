@@ -1,7 +1,7 @@
 // api/notify.js
 import admin from 'firebase-admin';
 
-const serviceAccount = require('./path/to/your/serviceAccountKey.json'); // Asegúrate de que la ruta sea correcta
+const serviceAccount = require('./serviceAccountKey.json'); //act
 
 if (!admin.apps.length) {
     admin.initializeApp({
