@@ -14,6 +14,14 @@ if (!admin.apps.length) {
         }),
     });
 }
+try {
+    const response = await admin.messaging().send(message);
+    console.log("Response from FCM: ", response);
+    return res.status(200).json({ success: true, response });
+} catch (error) {
+    console.error("Error sending message:", error);
+    return res.status(500).json({ success: false, error: error.message });
+}
 
 export default async function handler(req, res) {
     if (req.method === 'POST') {
