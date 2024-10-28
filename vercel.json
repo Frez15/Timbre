@@ -12,6 +12,10 @@
   ],
   "routes": [
     {
+      "src": "/api/notify",
+      "dest": "/api/notify.js"
+    },
+    {
       "src": "/api/(.*)",
       "dest": "/api/$1"
     },
@@ -21,3 +25,4 @@
     }
   ]
 }
+
