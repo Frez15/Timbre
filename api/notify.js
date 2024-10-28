@@ -21,7 +21,7 @@ if (!admin.apps.length) {
 }
 
 // Handler para la solicitud de notificación
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) { // Usar module.exports en lugar de export default
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Método no permitido' });
   }
@@ -48,4 +48,4 @@ export default async function handler(req, res) {
     console.error('Error enviando notificación:', error);
     return res.status(500).json({ message: 'Error enviando notificación', error: error.message });
   }
-}
+};
