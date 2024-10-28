@@ -13,5 +13,8 @@
     "express": "^4.21.1",
     "firebase-admin": "^12.6.0",
     "googleapis": "^144.0.0"
+  },
+  "engines": {
+    "node": "16.x"
   }
 }
