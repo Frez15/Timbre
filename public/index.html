@@ -65,6 +65,25 @@
         let vecesTocado = 0;
         let ultimaVezTocado = 0;
 
+        // Función para obtener el token del backend
+        function obtenerTokenDeBackend() {
+            const url = 'https://timbre-tau.vercel.app/api/store-token'; // Ajusta a tu endpoint para obtener el token
+
+            return fetch(url)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Error al obtener el token');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    return data.token; // Asegúrate de que esto coincida con la estructura de tu respuesta del backend
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        }
+
         // Función para enviar el token al backend
         function sendTokenToBackend(token) {
             const url = 'https://timbre-tau.vercel.app/api/notify';
@@ -116,15 +135,14 @@
                     boton.innerText = 'TOCAR';
                 }, 300000); // 5 minutos
 
-                // Recuperar el token almacenado
-                const token = localStorage.getItem('store-token'); // Cambia 'store-token' por la clave que usaste
-
-                // Comprobar que el token existe antes de enviarlo
-                if (token) {
-                    sendTokenToBackend(token);
-                } else {
-                    mensaje.innerText = 'No se encontró el token almacenado.';
-                }
+                // Recuperar el token almacenado en el backend
+                obtenerTokenDeBackend().then(token => {
+                    if (token) {
+                        sendTokenToBackend(token);
+                    } else {
+                        mensaje.innerText = 'No se encontró el token almacenado en el backend.';
+                    }
+                });
             } else {
                 mensaje.innerText = 'Has tocado el timbre demasiadas veces. Espera 5 minutos.';
             }
