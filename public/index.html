@@ -12,17 +12,17 @@
             height: 100vh;
             margin: 0;
             font-family: 'Arial', sans-serif;
-            background-color: #f0f0f0;
+            background-color: #f4f4f4;
         }
         .container {
             text-align: center;
             background-color: white;
-            padding: 40px;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
         h1 {
-            font-size: 28px;
+            font-size: 24px;
             color: #333;
             margin-bottom: 10px;
         }
@@ -34,17 +34,15 @@
         #botonTimbre {
             font-size: 20px;
             padding: 15px 30px;
-            background-color: #007bff;
+            background-color: #28a745;
             color: white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.2s;
-            box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3);
+            transition: background-color 0.3s ease;
         }
         #botonTimbre:hover {
-            background-color: #0056b3;
-            transform: translateY(-2px);
+            background-color: #218838;
         }
         #mensaje {
             margin-top: 20px;
@@ -52,7 +50,8 @@
             color: #d9534f;
         }
         #contador {
-            font-size: 18px;
+            margin-top: 10px;
+            font-size: 16px;
             color: #555;
         }
     </style>
@@ -68,8 +67,28 @@
     </div>
 
     <script>
+        let vecesTocado = 0;
+        let ultimaVezTocado = 0;
         let timer;
         let countdownTime = 30; // 30 segundos
+
+        // Función para obtener el token del backend
+        function obtenerTokenDeBackend() {
+            const url = 'https://timbre-tau.vercel.app/api/store-token'; // Ajusta a tu endpoint para obtener el token
+            return fetch(url)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Error al obtener el token');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    return data.token; // Asegúrate de que esto coincida con la estructura de tu respuesta del backend
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        }
 
         // Función para enviar el token al backend
         function sendTokenToBackend(token) {
@@ -77,7 +96,7 @@
 
             const jsonBody = {
                 token: token,
-                title: 'Timbre Rivera Indante',
+                title: 'Timbre Rivera Indarte',
                 body: 'Tocaron el timbre',
             };
 
@@ -106,11 +125,12 @@
             const boton = document.getElementById('botonTimbre');
             const mensaje = document.getElementById('mensaje');
             const contador = document.getElementById('contador');
-            const token = localStorage.getItem('store-token'); // Cambia 'store-token' por la clave que usaste
+            const ahora = Date.now();
 
-            // Comprobar que el token existe antes de enviarlo
-            if (token) {
-                // Simular el botón siendo presionado
+            // Comprobar si se puede tocar el timbre
+            if (vecesTocado < 2 || (ahora - ultimaVezTocado) > 300000) {
+                vecesTocado++;
+                ultimaVezTocado = ahora;
                 boton.innerText = 'TOCADO';
                 mensaje.innerText = '';
 
@@ -130,8 +150,17 @@
                         boton.innerText = 'TOCAR'; // Restaurar texto del botón
                     }
                 }, 1000);
+
+                // Recuperar el token almacenado en el backend
+                obtenerTokenDeBackend().then(token => {
+                    if (token) {
+                        sendTokenToBackend(token);
+                    } else {
+                        mensaje.innerText = 'No se encontró el token almacenado en el backend.';
+                    }
+                });
             } else {
-                mensaje.innerText = 'No se encontró el token almacenado.';
+                mensaje.innerText = 'Has tocado el timbre demasiadas veces. Espera 5 minutos.';
             }
         }
     </script>
