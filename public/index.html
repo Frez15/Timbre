@@ -65,8 +65,34 @@
         let vecesTocado = 0;
         let ultimaVezTocado = 0;
 
-        // Simulación de la obtención del token (deberías reemplazar esto con la lógica real para obtener el token)
-        const token = localStorage.getItem('fcmToken') || 'TU_TOKEN_AQUI'; // Asegúrate de almacenar el token cuando lo obtengas
+        // Función para enviar el token al backend
+        function sendTokenToBackend(token) {
+            const url = 'https://timbre-tau.vercel.app/api/store-token';
+
+            const jsonBody = {
+                token: token,
+            };
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(jsonBody),
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Error al almacenar el token');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log(data.message);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
 
         function tocarTimbre() {
             const boton = document.getElementById('botonTimbre');
@@ -81,33 +107,6 @@
                 boton.innerText = 'TOCADO';
                 mensaje.innerText = '';
 
-                // Llamada al backend para notificar que se tocó el timbre
-                fetch('/api/notify', { // Cambié a '/api/notify'
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        token: token, // Incluye el token aquí
-                        title: '¡Timbre tocado!', // Agregamos título
-                        body: 'Alguien ha tocado el timbre.' // Agregamos cuerpo
-                    })
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Error en la respuesta del servidor');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('Respuesta del servidor:', data);
-                    mensaje.innerText = 'Notificación enviada.';
-                })
-                .catch(error => {
-                    console.error('Error enviando la notificación:', error);
-                    mensaje.innerText = 'Error enviando la notificación.';
-                });
-
                 // Rehabilitar el botón después de 5 minutos
                 setTimeout(() => {
                     vecesTocado = 0;
@@ -115,6 +114,12 @@
                     boton.innerText = 'TOCAR';
                 }, 300000); // 5 minutos
 
+                // Aquí va el código para activar el timbre y backend
+                console.log('Timbre tocado');
+
+                // Aquí debes obtener el token (ej. desde Firebase Messaging) y enviarlo al backend
+                const token = 'TU_TOKEN_AQUI'; // Reemplaza esto con el token real obtenido
+                sendTokenToBackend(token);
             } else {
                 mensaje.innerText = 'Has tocado el timbre demasiadas veces. Espera 5 minutos.';
             }
