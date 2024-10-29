@@ -9,7 +9,7 @@ admin.initializeApp({
     type: process.env.FIREBASE_TYPE,
     project_id: process.env.FIREBASE_PROJECT_ID,
     private_key_id: process.env.FIREBASE_PRIVATE_KEY_ID,
-    private_key: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'), // Importante para formatear el salto de línea
+    private_key: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'), // Formato para saltos de línea
     client_email: process.env.FIREBASE_CLIENT_EMAIL,
     client_id: process.env.FIREBASE_CLIENT_ID,
     auth_uri: process.env.FIREBASE_AUTH_URI,
@@ -22,36 +22,41 @@ admin.initializeApp({
 // Middleware para interpretar JSON en el body de la solicitud
 app.use(express.json());
 
-// Función para enviar notificación push
-function enviarNotificacion(token) {
-    const message = {
-        notification: {
-            title: '¡Timbre tocado!',
-            body: 'Alguien ha tocado el timbre.'
-        },
-        token: token // Token del dispositivo que recibirá la notificación
-    };
-
-    admin.messaging().send(message)
-        .then((response) => {
-            console.log('Notificación enviada:', response);
-        })
-        .catch((error) => {
-            console.error('Error enviando notificación:', error);
-        });
-}
-
 // Ruta para tocar el timbre
-app.post('/tocar-timbre', (req, res) => {
-    const { token } = req.body; // Recibe el token desde la solicitud
-    console.log('¡Timbre tocado!');
+app.post('/api/tocar-timbre', (req, res) => { // Cambié a '/api/tocar-timbre'
+  const { token } = req.body; // Recibe el token desde la solicitud
+  console.log('¡Timbre tocado!');
 
-    // Enviar notificación push al token del dispositivo
-    enviarNotificacion(token);
+  // Asegúrate de que el token esté presente
+  if (!token) {
+    return res.status(400).json({ message: 'Token es requerido' });
+  }
 
-    res.send('Timbre activado y notificación enviada.');
+  // Llamar a la función para enviar notificación
+  enviarNotificacion(token);
+
+  res.send('Timbre activado y notificación enviada.');
 });
 
+// Función para enviar notificación push
+function enviarNotificacion(token) {
+  const message = {
+    notification: {
+      title: '¡Timbre tocado!',
+      body: 'Alguien ha tocado el timbre.'
+    },
+    token: token // Token del dispositivo que recibirá la notificación
+  };
+
+  admin.messaging().send(message)
+    .then((response) => {
+      console.log('Notificación enviada:', response);
+    })
+    .catch((error) => {
+      console.error('Error enviando notificación:', error);
+    });
+}
+
 app.listen(PORT, () => {
-    console.log(`Servidor escuchando en el puerto ${PORT}`);
+  console.log(`Servidor escuchando en el puerto ${PORT}`);
 });
