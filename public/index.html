@@ -128,7 +128,7 @@
             const ahora = Date.now();
 
             // Comprobar si se puede tocar el timbre
-            if (vecesTocado < 2 || (ahora - ultimaVezTocado) > 300000) {
+            if (vecesTocado < 1 || (ahora - ultimaVezTocado) > 30000) {
                 vecesTocado++;
                 ultimaVezTocado = ahora;
                 boton.innerText = 'TOCADO';
@@ -160,7 +160,7 @@
                     }
                 });
             } else {
-                mensaje.innerText = 'Has tocado el timbre demasiadas veces. Espera 5 minutos.';
+                mensaje.innerText = 'Has tocado el timbre demasiadas veces. Espera por favor.';
             }
         }
     </script>
