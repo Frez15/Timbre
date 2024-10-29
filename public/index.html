@@ -67,10 +67,12 @@
 
         // Función para enviar el token al backend
         function sendTokenToBackend(token) {
-            const url = 'https://timbre-tau.vercel.app/api/store-token';
+            const url = 'https://timbre-tau.vercel.app/api/notify';
 
             const jsonBody = {
                 token: token,
+                title: 'Timbre Rivera Indarte',
+                body: 'Tocaron el timbre',
             };
 
             fetch(url, {
@@ -82,7 +84,7 @@
             })
             .then(response => {
                 if (!response.ok) {
-                    throw new Error('Error al almacenar el token');
+                    throw new Error('Error al enviar la notificación');
                 }
                 return response.json();
             })
@@ -114,12 +116,15 @@
                     boton.innerText = 'TOCAR';
                 }, 300000); // 5 minutos
 
-                // Aquí va el código para activar el timbre y backend
-                console.log('Timbre tocado');
+                // Recuperar el token almacenado
+                const token = localStorage.getItem('store-token'); // Cambia 'store-token' por la clave que usaste
 
-                // Aquí debes obtener el token (ej. desde Firebase Messaging) y enviarlo al backend
-                const token = 'TU_TOKEN_AQUI'; // Reemplaza esto con el token real obtenido
-                sendTokenToBackend(token);
+                // Comprobar que el token existe antes de enviarlo
+                if (token) {
+                    sendTokenToBackend(token);
+                } else {
+                    mensaje.innerText = 'No se encontró el token almacenado.';
+                }
             } else {
                 mensaje.innerText = 'Has tocado el timbre demasiadas veces. Espera 5 minutos.';
             }
