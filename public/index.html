@@ -44,6 +44,23 @@
         #botonTimbre:hover {
             background-color: #218838;
         }
+        #botonTimbre.sonando {
+            animation: respirar 1s infinite; /* Agregar clase de animación */
+        }
+        @keyframes respirar {
+            0% {
+                transform: scale(1);
+                background-color: #28a745; /* Color original */
+            }
+            50% {
+                transform: scale(1.05); /* Aumentar un poco el tamaño */
+                background-color: #218838; /* Color más oscuro */
+            }
+            100% {
+                transform: scale(1); /* Volver al tamaño original */
+                background-color: #28a745; /* Color original */
+            }
+        }
         #mensaje {
             margin-top: 20px;
             font-size: 16px;
@@ -132,6 +149,7 @@
                 vecesTocado++;
                 ultimaVezTocado = ahora;
                 boton.innerText = 'SONANDO';
+                boton.classList.add('sonando'); // Agregar la clase de animación
                 mensaje.innerText = '';
 
                 // Iniciar el contador
@@ -148,6 +166,7 @@
                         contador.style.display = 'none';
                         countdownTime = 30; // Resetear el contador
                         boton.innerText = 'TOCAR'; // Restaurar texto del botón
+                        boton.classList.remove('sonando'); // Remover la clase de animación
                         mensaje.innerText = '';
                     }
                 }, 1000);
