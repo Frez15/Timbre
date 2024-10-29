@@ -16,6 +16,10 @@
       "dest": "/api/notify.js"
     },
     {
+      "src": "/api/store-token",
+      "dest": "/api/store-token.js"
+    },
+    {
       "src": "/api/(.*)",
       "dest": "/api/$1"
     },
