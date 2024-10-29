@@ -78,6 +78,27 @@
                 boton.innerText = 'TOCADO';
                 mensaje.innerText = '';
 
+                // Llamada al backend para notificar que se tocó el timbre
+                fetch('/api/notify', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        title: '¡Timbre tocado!',
+                        body: 'Alguien ha tocado el timbre.'
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Respuesta del servidor:', data);
+                    mensaje.innerText = 'Notificación enviada.';
+                })
+                .catch(error => {
+                    console.error('Error enviando la notificación:', error);
+                    mensaje.innerText = 'Error enviando la notificación.';
+                });
+
                 // Rehabilitar el botón después de 5 minutos
                 setTimeout(() => {
                     vecesTocado = 0;
@@ -85,8 +106,6 @@
                     boton.innerText = 'TOCAR';
                 }, 300000); // 5 minutos
 
-                // Aquí va el código para activar el timbre y backend
-                console.log('Timbre tocado');
             } else {
                 mensaje.innerText = 'Has tocado el timbre demasiadas veces. Espera 5 minutos.';
             }
