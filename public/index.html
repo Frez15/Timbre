@@ -131,7 +131,7 @@
             if (vecesTocado < 1 || (ahora - ultimaVezTocado) > 30000) {
                 vecesTocado++;
                 ultimaVezTocado = ahora;
-                boton.innerText = 'TOCADO';
+                boton.innerText = 'SONANDO';
                 mensaje.innerText = '';
 
                 // Iniciar el contador
@@ -148,6 +148,7 @@
                         contador.style.display = 'none';
                         countdownTime = 30; // Resetear el contador
                         boton.innerText = 'TOCAR'; // Restaurar texto del botón
+                        mensaje.innerText = '';
                     }
                 }, 1000);
 
@@ -160,7 +161,7 @@
                     }
                 });
             } else {
-                mensaje.innerText = 'Has tocado el timbre demasiadas veces. Espera por favor.';
+                mensaje.innerText = 'Ya tocaste el timbre. Esperá por favor.';
             }
         }
     </script>
