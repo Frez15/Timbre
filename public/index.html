@@ -65,6 +65,9 @@
         let vecesTocado = 0;
         let ultimaVezTocado = 0;
 
+        // Simulación de la obtención del token (deberías reemplazar esto con la lógica real para obtener el token)
+        const token = localStorage.getItem('fcmToken') || 'TU_TOKEN_AQUI'; // Asegúrate de almacenar el token cuando lo obtengas
+
         function tocarTimbre() {
             const boton = document.getElementById('botonTimbre');
             const mensaje = document.getElementById('mensaje');
@@ -79,17 +82,23 @@
                 mensaje.innerText = '';
 
                 // Llamada al backend para notificar que se tocó el timbre
-                fetch('/api/notify', {
+                fetch('/api/notify', { // Cambié a '/api/notify'
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        title: '¡Timbre tocado!',
-                        body: 'Alguien ha tocado el timbre.'
+                        token: token, // Incluye el token aquí
+                        title: '¡Timbre tocado!', // Agregamos título
+                        body: 'Alguien ha tocado el timbre.' // Agregamos cuerpo
                     })
                 })
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Error en la respuesta del servidor');
+                    }
+                    return response.json();
+                })
                 .then(data => {
                     console.log('Respuesta del servidor:', data);
                     mensaje.innerText = 'Notificación enviada.';
