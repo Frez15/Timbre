@@ -33,7 +33,7 @@ module.exports = async function handler(req, res) { // Usar module.exports en lu
   if (!token || !title || !body) {
     return res.status(400).json({ message: 'Faltan campos requeridos' });
   }
-
+  console.log('Token recibido:', token);  // Log para verificar el token
   const message = {
     notification: {
       title: title,
