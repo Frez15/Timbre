@@ -24,8 +24,7 @@ async function dbConnect() {
 
   if (!cached.promise) {
     const opts = {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
+      // Las opciones `useNewUrlParser` y `useUnifiedTopology` ya no son necesarias
     };
 
     cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
