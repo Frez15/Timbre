@@ -12,12 +12,16 @@
   ],
   "routes": [
     {
-      "src": "/api/notify",
-      "dest": "/api/notify.js"
+      "src": "/api/register",
+      "dest": "/api/register.js"
     },
     {
-      "src": "/api/store-token",
-      "dest": "/api/store-token.js"
+      "src": "/api/update-token",
+      "dest": "/api/update-token.js"
+    },
+    {
+      "src": "/api/notify",
+      "dest": "/api/notify.js"
     },
     {
       "src": "/api/(.*)",
@@ -29,4 +33,3 @@
     }
   ]
 }
-
