@@ -1,53 +1,64 @@
 // api/notify.js
 
+const dbConnect = require('./lib/mongodb');
+const User = require('./models/User');
 const admin = require('firebase-admin');
 
-// Inicializar Firebase usando variables de entorno
+// Inicializar Firebase Admin SDK
 if (!admin.apps.length) {
   admin.initializeApp({
     credential: admin.credential.cert({
       type: process.env.FIREBASE_TYPE,
       project_id: process.env.FIREBASE_PROJECT_ID,
       private_key_id: process.env.FIREBASE_PRIVATE_KEY_ID,
-      private_key: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'), // Formato para saltos de línea
+      private_key: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
       client_email: process.env.FIREBASE_CLIENT_EMAIL,
       client_id: process.env.FIREBASE_CLIENT_ID,
       auth_uri: process.env.FIREBASE_AUTH_URI,
       token_uri: process.env.FIREBASE_TOKEN_URI,
       auth_provider_x509_cert_url: process.env.FIREBASE_AUTH_PROVIDER_CERT_URL,
       client_x509_cert_url: process.env.FIREBASE_CLIENT_CERT_URL,
-     
-
-    })
+    }),
   });
 }
 
-// Handler para la solicitud de notificación
-module.exports = async function handler(req, res) { // Usar module.exports en lugar de export default
-  if (req.method !== 'POST') {
-    return res.status(405).json({ message: 'Método no permitido' });
-  }
+module.exports = async function handler(req, res) {
+  if (req.method === 'POST') {
+    await dbConnect();
 
-  const { token, title, body } = req.body;
+    const { floor, apartment, title, body } = req.body;
 
-  if (!token || !title || !body) {
-    return res.status(400).json({ message: 'Faltan campos requeridos' });
-  }
-  console.log('Token recibido:', token);  // Log para verificar el token
-  const message = {
-    notification: {
-      title: title,
-      body: body,
-    },
-    token: token, // Token del dispositivo que recibirá la notificación
-  };
+    // Validación de campos requeridos
+    if (floor === undefined || !apartment) {
+      return res.status(400).json({ message: 'Faltan piso o departamento.' });
+    }
 
-  try {
-    const response = await admin.messaging().send(message);
-    console.log('Notificación enviada correctamente:', response);
-    return res.status(200).json({ message: 'Notificación enviada con éxito', response });
-  } catch (error) {
-    console.error('Error enviando notificación:', error);
-    return res.status(500).json({ message: 'Error enviando notificación', error: error.message });
+    try {
+      // Buscar al usuario por piso y departamento
+      const user = await User.findOne({ floor: Number(floor), apartment });
+
+      if (!user || !user.token) {
+        return res.status(404).json({ message: 'Usuario no encontrado o sin token.' });
+      }
+
+      // Crear el payload de la notificación
+      const payload = {
+        notification: {
+          title: title || 'Timbre Presionado',
+          body: body || 'Alguien tocó el timbre.',
+        },
+      };
+
+      // Enviar la notificación mediante FCM
+      const response = await admin.messaging().sendToDevice(user.token, payload);
+
+      return res.status(200).json({ message: 'Notificación enviada exitosamente.', response });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ message: 'Error al enviar la notificación.' });
+    }
+  } else {
+    res.setHeader('Allow', ['POST']);
+    res.status(405).end(`Método ${req.method} no permitido.`);
   }
 };
