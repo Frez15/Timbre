@@ -1,7 +1,7 @@
 // api/lib/mongodb.js
 
 const mongoose = require('mongoose');
-require('dotenv').config(); // Añade esta línea para cargar variables de entorno
+require('dotenv').config(); // Cargar variables de entorno desde .env
 
 const MONGODB_URI = process.env.MONGODB_URI;
 
