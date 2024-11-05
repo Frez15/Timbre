@@ -13,7 +13,7 @@ const UserSchema = new mongoose.Schema({
     unique: true,
   },
   floor: {
-    type: Number,
+    type: String,
     required: true,
   },
   apartment: {
