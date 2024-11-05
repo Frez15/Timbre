@@ -31,23 +31,9 @@ module.exports = async function handler(req, res) {
     console.log('Received /api/notify request:', req.body);
 
     // Validación de campos requeridos
-    if (floor === undefined || !apartment) {
+    if (!floor || !apartment) {
       console.log('Faltan piso o departamento.');
       return res.status(400).json({ message: 'Faltan piso o departamento.' });
-    }
-
-    // Validaciones adicionales (opcional)
-    const validFloors = ['PB', '1', '2', '3', '4', '5', '6', '7', '8', 'Encargado'];
-    const validApartments = ['A', 'B', 'C', 'D']; // Ajusta según tus departamentos
-
-    if (!validFloors.includes(floor)) {
-      console.log('Piso inválido:', floor);
-      return res.status(400).json({ message: 'Piso inválido.' });
-    }
-
-    if (!validApartments.includes(apartment)) {
-      console.log('Departamento inválido:', apartment);
-      return res.status(400).json({ message: 'Departamento inválido.' });
     }
 
     try {
@@ -61,25 +47,26 @@ module.exports = async function handler(req, res) {
         return res.status(404).json({ message: 'Usuario no encontrado o sin token.' });
       }
 
-      // Crear el payload de la notificación
-      const payload = {
+      // Crear el mensaje usando la nueva API de FCM
+      const message = {
         notification: {
           title: title || 'Timbre Presionado',
           body: body || 'Alguien tocó el timbre.',
         },
+        token: user.token,
       };
 
-      console.log('Enviando notificación con payload:', payload);
+      console.log('Enviando mensaje:', message);
 
-      // Enviar la notificación mediante FCM
-      const response = await admin.messaging().sendToDevice(user.token, payload);
+      // Enviar el mensaje
+      const response = await admin.messaging().send(message);
 
       console.log('Respuesta de FCM:', response);
 
       return res.status(200).json({ message: 'Notificación enviada exitosamente.', response });
     } catch (error) {
       console.error('Error al enviar la notificación:', error);
-      return res.status(500).json({ message: 'Error al enviar la notificación.' });
+      return res.status(500).json({ message: 'Error al enviar la notificación.', error: error.message });
     }
   } else {
     res.setHeader('Allow', ['POST']);
