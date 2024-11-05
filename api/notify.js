@@ -28,8 +28,11 @@ module.exports = async function handler(req, res) {
 
     const { floor, apartment, title, body } = req.body;
 
+    console.log('Received /api/notify request:', req.body);
+
     // Validación de campos requeridos
     if (floor === undefined || !apartment) {
+      console.log('Faltan piso o departamento.');
       return res.status(400).json({ message: 'Faltan piso o departamento.' });
     }
 
@@ -37,7 +40,10 @@ module.exports = async function handler(req, res) {
       // Buscar al usuario por piso y departamento
       const user = await User.findOne({ floor: Number(floor), apartment });
 
+      console.log('Usuario encontrado:', user);
+
       if (!user || !user.token) {
+        console.log('Usuario no encontrado o sin token.');
         return res.status(404).json({ message: 'Usuario no encontrado o sin token.' });
       }
 
@@ -49,12 +55,16 @@ module.exports = async function handler(req, res) {
         },
       };
 
+      console.log('Enviando notificación con payload:', payload);
+
       // Enviar la notificación mediante FCM
       const response = await admin.messaging().sendToDevice(user.token, payload);
 
+      console.log('Respuesta de FCM:', response);
+
       return res.status(200).json({ message: 'Notificación enviada exitosamente.', response });
     } catch (error) {
-      console.error(error);
+      console.error('Error al enviar la notificación:', error);
       return res.status(500).json({ message: 'Error al enviar la notificación.' });
     }
   } else {
