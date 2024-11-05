@@ -12,22 +12,32 @@
             box-sizing: border-box;
         }
 
+        html, body {
+            height: 100%;
+            width: 100%;
+            overflow: hidden; /* Evita barras de desplazamiento innecesarias */
+        }
+
         body {
             font-family: 'Arial', sans-serif;
             background-color: #f0f2f5;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            padding: 20px; /* Espaciado interno para evitar que el contenido toque los bordes */
         }
 
         .container {
-            width: 95%;
-            max-width: 900px;
+            width: 100%;
+            max-width: 1000px;
+            height: 100%;
             background-color: #fff;
             padding: 20px 30px;
             border-radius: 10px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden; /* Evita que contenido interno se desborde */
         }
 
         h1 {
@@ -45,6 +55,10 @@
             font-size: 1.2rem;
             margin-bottom: 10px;
             color: #555;
+            background-color: #e9ecef;
+            padding: 8px 12px;
+            border-radius: 5px;
+            display: inline-block;
         }
 
         .timbres {
@@ -62,7 +76,7 @@
             cursor: pointer;
             transition: background-color 0.3s;
             user-select: none;
-            flex: 1 1 calc(25% - 20px); /* Ajustar según el número de timbres por piso */
+            flex: 1 1 calc(25% - 20px); /* Ajusta el tamaño según el número de timbres por piso */
             max-width: calc(25% - 20px);
             white-space: nowrap;
             overflow: hidden;
@@ -79,6 +93,9 @@
             flex-direction: column;
             align-items: center;
             transition: opacity 0.3s;
+            width: 100%;
+            height: 100%;
+            overflow-y: auto; /* Permite desplazamiento si el contenido excede la altura */
         }
 
         .intercom-section.active {
@@ -91,17 +108,24 @@
             color: #333;
             text-align: center;
             word-wrap: break-word;
+            background-color: #e9ecef;
+            padding: 10px 15px;
+            border-radius: 5px;
+            width: 100%;
+            max-width: 500px;
         }
 
         .form-group {
             width: 100%;
             margin-bottom: 15px;
+            max-width: 500px;
         }
 
         .form-group label {
             display: block;
             margin-bottom: 5px;
             color: #555;
+            font-weight: bold;
         }
 
         .form-group input, .form-group select {
@@ -118,6 +142,7 @@
             margin-top: 20px;
             width: 100%;
             justify-content: center;
+            max-width: 500px;
         }
 
         .button {
@@ -151,6 +176,8 @@
             margin-top: 15px;
             font-size: 1rem;
             text-align: center;
+            max-width: 500px;
+            word-wrap: break-word;
         }
 
         .message.success {
@@ -159,6 +186,13 @@
 
         .message.error {
             color: #dc3545;
+        }
+
+        /* Loader */
+        .loader {
+            margin-top: 15px;
+            font-size: 1rem;
+            color: #007bff;
         }
 
         /* Responsive */
@@ -194,7 +228,7 @@
             <h1>Portero Eléctrico TimbrOn</h1>
             <!-- PB -->
             <div class="floor" id="floor-PB">
-                <div class="floor-title">PB</div>
+                <div class="floor-title">PISO PB</div>
                 <div class="timbres">
                     <div class="timbre" data-timbre="PB-A">A</div>
                     <div class="timbre" data-timbre="PB-B">B</div>
@@ -203,7 +237,7 @@
 
             <!-- Pisos 1 al 8 -->
             <div class="floor" id="floor-1">
-                <div class="floor-title">1</div>
+                <div class="floor-title">PISO 1</div>
                 <div class="timbres">
                     <div class="timbre" data-timbre="1-A">A</div>
                     <div class="timbre" data-timbre="1-B">B</div>
@@ -213,7 +247,7 @@
             </div>
 
             <div class="floor" id="floor-2">
-                <div class="floor-title">2</div>
+                <div class="floor-title">PISO 2</div>
                 <div class="timbres">
                     <div class="timbre" data-timbre="2-A">A</div>
                     <div class="timbre" data-timbre="2-B">B</div>
@@ -223,7 +257,7 @@
             </div>
 
             <div class="floor" id="floor-3">
-                <div class="floor-title">3</div>
+                <div class="floor-title">PISO 3</div>
                 <div class="timbres">
                     <div class="timbre" data-timbre="3-A">A</div>
                     <div class="timbre" data-timbre="3-B">B</div>
@@ -233,7 +267,7 @@
             </div>
 
             <div class="floor" id="floor-4">
-                <div class="floor-title">4</div>
+                <div class="floor-title">PISO 4</div>
                 <div class="timbres">
                     <div class="timbre" data-timbre="4-A">A</div>
                     <div class="timbre" data-timbre="4-B">B</div>
@@ -242,7 +276,7 @@
             </div>
 
             <div class="floor" id="floor-5">
-                <div class="floor-title">5</div>
+                <div class="floor-title">PISO 5</div>
                 <div class="timbres">
                     <div class="timbre" data-timbre="5-A">A</div>
                     <div class="timbre" data-timbre="5-B">B</div>
@@ -251,7 +285,7 @@
             </div>
 
             <div class="floor" id="floor-6">
-                <div class="floor-title">6</div>
+                <div class="floor-title">PISO 6</div>
                 <div class="timbres">
                     <div class="timbre" data-timbre="6-A">A</div>
                     <div class="timbre" data-timbre="6-B">B</div>
@@ -260,7 +294,7 @@
             </div>
 
             <div class="floor" id="floor-7">
-                <div class="floor-title">7</div>
+                <div class="floor-title">PISO 7</div>
                 <div class="timbres">
                     <div class="timbre" data-timbre="7-A">A</div>
                     <div class="timbre" data-timbre="7-B">B</div>
@@ -269,7 +303,7 @@
             </div>
 
             <div class="floor" id="floor-8">
-                <div class="floor-title">8</div>
+                <div class="floor-title">PISO 8</div>
                 <div class="timbres">
                     <div class="timbre" data-timbre="8-A">A</div>
                     <div class="timbre" data-timbre="8-B">B</div>
@@ -296,8 +330,8 @@
             </div>
 
             <div class="form-group">
-                <label for="message">Mensaje desde la App:</label>
-                <div id="app-message" style="padding: 10px; border: 1px solid #ccc; border-radius: 5px; width: 100%; min-height: 40px;">
+                <label for="app-message">Mensaje desde la App:</label>
+                <div id="app-message" style="padding: 10px; border: 1px solid #ccc; border-radius: 5px; width: 100%; min-height: 40px; background-color: #f8f9fa;">
                     <!-- El mensaje desde la app aparecerá aquí -->
                 </div>
             </div>
@@ -308,6 +342,7 @@
             </div>
 
             <div class="message" id="feedback-message"></div>
+            <div class="loader" id="loader" style="display:none;">Enviando notificación...</div>
         </div>
 
         <script>
@@ -319,6 +354,7 @@
             const backButton = document.getElementById('back-button');
             const feedbackMessage = document.getElementById('feedback-message');
             const appMessageDiv = document.getElementById('app-message');
+            const loader = document.getElementById('loader');
 
             // Manejar clics en los timbres
             const timbreElements = document.querySelectorAll('.timbre');
@@ -326,14 +362,21 @@
                 timbre.addEventListener('click', () => {
                     const timbreId = timbre.getAttribute('data-timbre');
                     console.log(`Timbre clicado: ${timbreId}`); // Debug
-                    intercomTitle.innerText = timbre.innerText;
+
+                    // Actualizar el título del intercom
+                    intercomTitle.innerText = `Timbre ${timbre.innerText}`;
+
+                    // Guardar el ID del timbre seleccionado
                     intercomSection.setAttribute('data-timbre-id', timbreId);
+
+                    // Ocultar la sección principal y mostrar la sección de intercom
                     mainSection.classList.remove('active');
                     intercomSection.classList.add('active');
+
+                    // Limpiar mensajes anteriores
                     feedbackMessage.innerText = '';
                     appMessageDiv.innerText = '';
                     document.getElementById('name').value = '';
-                    document.getElementById('message').value = '';
 
                     // Obtener el mensaje desde la app para este timbre
                     fetch(`/api/get-message?floor=${getFloor(timbreId)}&apartment=${getApartment(timbreId)}`)
@@ -365,7 +408,6 @@
                 console.log('Botón TOCAR clicado'); // Debug
                 const timbreId = intercomSection.getAttribute('data-timbre-id');
                 const name = document.getElementById('name').value.trim();
-                // const message = document.getElementById('message').value; // Ya no se envía desde la web
 
                 // Extraer piso y departamento del timbreId
                 let floor;
@@ -399,6 +441,10 @@
 
                 console.log('Enviando solicitud:', requestBody); // Debug
 
+                // Mostrar loader
+                loader.style.display = 'block';
+                feedbackMessage.innerText = '';
+                
                 // Enviar la solicitud al backend
                 fetch('/api/notify', {
                     method: 'POST',
@@ -409,6 +455,8 @@
                 })
                 .then(response => response.json())
                 .then(data => {
+                    // Ocultar loader
+                    loader.style.display = 'none';
                     console.log('Respuesta del servidor:', data); // Debug
                     if (data.message === 'Notificación enviada exitosamente.') {
                         feedbackMessage.innerText = 'Notificación enviada correctamente.';
@@ -425,6 +473,8 @@
                     }
                 })
                 .catch(error => {
+                    // Ocultar loader
+                    loader.style.display = 'none';
                     console.error('Error al enviar la notificación:', error);
                     feedbackMessage.innerText = 'Error al enviar la notificación.';
                     feedbackMessage.classList.remove('success');
