@@ -3,187 +3,198 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Timbre Rivera Indarte 242 PB A</title>
+    <title>Portero Eléctrico TimbrOn</title>
     <style>
+        /* Reset de márgenes y paddings */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f2f5;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            margin: 0;
-            font-family: 'Arial', sans-serif;
-            background-color: #f4f4f4;
         }
+
         .container {
-            text-align: center;
-            background-color: white;
-            padding: 30px;
+            width: 90%;
+            max-width: 800px;
+            background-color: #fff;
+            padding: 20px 30px;
             border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
+
         h1 {
-            font-size: 24px;
-            color: #333;
-            margin-bottom: 10px;
-        }
-        p {
-            font-size: 18px;
-            color: #555;
+            text-align: center;
             margin-bottom: 20px;
+            color: #333;
         }
-        #botonTimbre {
-            font-size: 20px;
-            padding: 15px 30px;
-            background-color: #28a745;
-            color: white;
+
+        /* Grid de timbres */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .timbre {
+            background-color: #007bff;
+            color: #fff;
+            padding: 15px;
+            text-align: center;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            user-select: none;
+        }
+
+        .timbre:hover {
+            background-color: #0056b3;
+        }
+
+        /* Sección de interacción con el timbre */
+        .intercom-section {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .intercom-section.active {
+            display: flex;
+        }
+
+        .intercom-title {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .form-group {
+            width: 100%;
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .button {
+            padding: 12px 25px;
+            font-size: 1rem;
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            transition: background-color 0.3s ease;
+            transition: background-color 0.3s;
+            color: #fff;
         }
-        #botonTimbre:hover {
+
+        .button.ring {
+            background-color: #28a745;
+        }
+
+        .button.ring:hover {
             background-color: #218838;
         }
-        #botonTimbre.sonando {
-            animation: respirar 1s infinite; /* Agregar clase de animación */
+
+        .button.back {
+            background-color: #6c757d;
         }
-        @keyframes respirar {
-            0% {
-                transform: scale(1);
-                background-color: #28a745; /* Color original */
-            }
-            50% {
-                transform: scale(1.05); /* Aumentar un poco el tamaño */
-                background-color: #218838; /* Color más oscuro */
-            }
-            100% {
-                transform: scale(1); /* Volver al tamaño original */
-                background-color: #28a745; /* Color original */
-            }
+
+        .button.back:hover {
+            background-color: #5a6268;
         }
-        #mensaje {
-            margin-top: 20px;
-            font-size: 16px;
-            color: #d9534f;
+
+        /* Mensajes de retroalimentación */
+        .message {
+            margin-top: 15px;
+            font-size: 1rem;
+            text-align: center;
         }
-        #contador {
-            margin-top: 10px;
-            font-size: 16px;
-            color: #555;
+
+        .message.success {
+            color: #28a745;
+        }
+
+        .message.error {
+            color: #dc3545;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .intercom-title {
+                font-size: 1.5rem;
+            }
+
+            .button {
+                padding: 10px 20px;
+                font-size: 0.9rem;
+            }
         }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h1>Timbre Rivera Indarte 242 PB A</h1>
-        <p>Presioná el botón para tocar el timbre.</p>
-        <button id="botonTimbre" onclick="tocarTimbre()">TOCAR</button>
-        <p id="mensaje"></p>
-        <p id="contador" style="display:none;"></p> <!-- Contador oculto inicialmente -->
-    </div>
-
-    <script>
-        let vecesTocado = 0;
-        let ultimaVezTocado = 0;
-        let timer;
-        let countdownTime = 30; // 30 segundos
-
-        // Función para obtener el token del backend
-        function obtenerTokenDeBackend() {
-            const url = 'https://timbre-tau.vercel.app/api/store-token'; // Ajusta a tu endpoint para obtener el token
-            return fetch(url)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Error al obtener el token');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    return data.token; // Asegúrate de que esto coincida con la estructura de tu respuesta del backend
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                });
-        }
-
-        // Función para enviar el token al backend
-        function sendTokenToBackend(token) {
-            const url = 'https://timbre-tau.vercel.app/api/notify';
-
-            const jsonBody = {
-                token: token,
-                title: 'Timbre Rivera Indarte',
-                body: 'Tocaron el timbre',
-            };
-
-            fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(jsonBody),
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Error al enviar la notificación');
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log(data.message);
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-        }
-
-        function tocarTimbre() {
-            const boton = document.getElementById('botonTimbre');
-            const mensaje = document.getElementById('mensaje');
-            const contador = document.getElementById('contador');
-            const ahora = Date.now();
-
-            // Comprobar si se puede tocar el timbre
-            if (vecesTocado < 1 || (ahora - ultimaVezTocado) > 30000) {
-                vecesTocado++;
-                ultimaVezTocado = ahora;
-                boton.innerText = 'SONANDO';
-                boton.classList.add('sonando'); // Agregar la clase de animación
-                mensaje.innerText = '';
-
-                // Iniciar el contador
-                contador.style.display = 'block';
-                contador.innerText = `Espere ${countdownTime} segundos para volver a presionar el botón.`;
-
-                timer = setInterval(() => {
-                    countdownTime--;
-                    contador.innerText = `Espere ${countdownTime} segundos para volver a presionar el botón.`;
-
-                    // Al llegar a 0, limpiar el intervalo y restablecer el botón
-                    if (countdownTime <= 0) {
-                        clearInterval(timer);
-                        contador.style.display = 'none';
-                        countdownTime = 30; // Resetear el contador
-                        boton.innerText = 'TOCAR'; // Restaurar texto del botón
-                        boton.classList.remove('sonando'); // Remover la clase de animación
-                        mensaje.innerText = '';
-                    }
-                }, 1000);
-
-                // Recuperar el token almacenado en el backend
-                obtenerTokenDeBackend().then(token => {
-                    if (token) {
-                        sendTokenToBackend(token);
-                    } else {
-                        mensaje.innerText = 'No se encontró el token almacenado en el backend.';
-                    }
-                });
-            } else {
-                mensaje.innerText = 'Ya tocaste el timbre. Esperá por favor.';
-            }
-        }
-    </script>
-
-</body>
-</html>
+        <!-- Sección Principal del Portero Eléctrico -->
+        <div class="main-section active" id="main-section">
+            <h1>Portero Eléctrico TimbrOn</h1>
+            <div class="grid">
+                <!-- PB A B -->
+                <div class="timbre" data-timbre="PB-A">PB A</div>
+                <div class="timbre" data-timbre="PB-B">PB B</div>
+                
+                <!-- Piso 1 -->
+                <div class="timbre" data-timbre="1-A">1 A</div>
+                <div class="timbre" data-timbre="1-B">1 B</div>
+                <div class="timbre" data-timbre="1-C">1 C</div>
+                <div class="timbre" data-timbre="1-D">1 D</div>
+                
+                <!-- Piso 2 -->
+                <div class="timbre" data-timbre="2-A">2 A</div>
+                <div class="timbre" data-timbre="2-B">2 B</div>
+                <div class="timbre" data-timbre="2-C">2 C</div>
+                <div class="timbre" data-timbre="2-D">2 D</div>
+                
+                <!-- Piso 3 -->
+                <div class="timbre" data-timbre="3-A">3 A</div>
+                <div class="timbre" data-timbre="3-B">3 B</div>
+                <div class="timbre" data-timbre="3-C">3 C</div>
+                <div class="timbre" data-timbre="3-D">3 D</div>
+                
+                <!-- Piso 4 -->
+                <div class="timbre" data-timbre="4-A">4 A</div>
+                <div class="timbre" data-timbre="4-B">4 B</div>
+                <div class="timbre" data-timbre="4-C">4 C</div>
+                
+                <!-- Piso 5 -->
+                <div class="timbre" data-timbre="5-A">5 A</div>
+                <div class="timbre" data-timbre="5-B">5 B</div>
+                <div class="timbre" data-timbre="5-C">5 C</div>
+                
+                <!-- Piso 6 -->
+                <div class="timbre" 
