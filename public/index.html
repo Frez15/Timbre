@@ -12,10 +12,11 @@
             box-sizing: border-box;
         }
 
+        /* Establecer el tamaño mínimo para html y body */
         html, body {
-            height: 100%;
+            min-height: 100%;
             width: 100%;
-            overflow: hidden; /* Evita barras de desplazamiento innecesarias */
+            overflow-x: hidden; /* Evita el desplazamiento horizontal */
         }
 
         body {
@@ -23,21 +24,20 @@
             background-color: #f0f2f5;
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: flex-start; /* Alinea al inicio para permitir scroll hacia abajo */
             padding: 20px; /* Espaciado interno para evitar que el contenido toque los bordes */
         }
 
         .container {
             width: 100%;
             max-width: 1000px;
-            height: 100%;
             background-color: #fff;
             padding: 20px 30px;
             border-radius: 10px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
             display: flex;
             flex-direction: column;
-            overflow: hidden; /* Evita que contenido interno se desborde */
+            min-height: 100vh; /* Asegura que la container ocupe al menos la altura completa del viewport */
         }
 
         h1 {
@@ -94,7 +94,7 @@
             align-items: center;
             transition: opacity 0.3s;
             width: 100%;
-            height: 100%;
+            flex-grow: 1;
             overflow-y: auto; /* Permite desplazamiento si el contenido excede la altura */
         }
 
@@ -473,7 +473,7 @@
                     }
                 })
                 .catch(error => {
-                    // Ocultar loaderss
+                    // Ocultar loader
                     loader.style.display = 'none';
                     console.error('Error al enviar la notificación:', error);
                     feedbackMessage.innerText = 'Error al enviar la notificación.';
