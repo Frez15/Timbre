@@ -197,4 +197,157 @@
                 <div class="timbre" data-timbre="5-C">5 C</div>
                 
                 <!-- Piso 6 -->
-                <div class="timbre" 
+                <div class="timbre" data-timbre="6-A">6 A</div>
+                <div class="timbre" data-timbre="6-B">6 B</div>
+                <div class="timbre" data-timbre="6-C">6 C</div>
+                
+                <!-- Piso 7 -->
+                <div class="timbre" data-timbre="7-A">7 A</div>
+                <div class="timbre" data-timbre="7-B">7 B</div>
+                <div class="timbre" data-timbre="7-C">7 C</div>
+                
+                <!-- Piso 8 -->
+                <div class="timbre" data-timbre="8-A">8 A</div>
+                <div class="timbre" data-timbre="8-B">8 B</div>
+                <div class="timbre" data-timbre="8-C">8 C</div>
+                
+                <!-- Encargado E -->
+                <div class="timbre" data-timbre="E-Encargado">E (Encargado)</div>
+            </div>
+        </div>
+
+        <!-- Sección de Intercom -->
+        <div class="intercom-section" id="intercom-section">
+            <h2 class="intercom-title" id="intercom-title">Timbre</h2>
+            
+            <div class="form-group">
+                <label for="name">INGRESE SU NOMBRE (opcional):</label>
+                <input type="text" id="name" placeholder="Nombre">
+            </div>
+
+            <div class="form-group">
+                <label for="message">Selecciona un mensaje predefinido:</label>
+                <select id="message">
+                    <option value="">--Selecciona un mensaje--</option>
+                    <option value="En camino">En camino</option>
+                    <option value="No estoy en casa">No estoy en casa</option>
+                    <option value="Espere por favor">Espere por favor</option>
+                </select>
+            </div>
+
+            <div class="buttons">
+                <button class="button ring" id="ring-button">TOCAR</button>
+                <button class="button back" id="back-button">VOLVER</button>
+            </div>
+
+            <div class="message" id="feedback-message"></div>
+        </div>
+    </div>
+
+    <script>
+        // Obtener referencias a elementos del DOM
+        const mainSection = document.getElementById('main-section');
+        const intercomSection = document.getElementById('intercom-section');
+        const intercomTitle = document.getElementById('intercom-title');
+        const ringButton = document.getElementById('ring-button');
+        const backButton = document.getElementById('back-button');
+        const feedbackMessage = document.getElementById('feedback-message');
+
+        // Manejar clics en los timbres
+        const timbreElements = document.querySelectorAll('.timbre');
+        timbreElements.forEach(timbre => {
+            timbre.addEventListener('click', () => {
+                const timbreId = timbre.getAttribute('data-timbre');
+                console.log(`Timbre clicado: ${timbreId}`); // Debug
+                intercomTitle.innerText = timbre.innerText;
+                intercomSection.setAttribute('data-timbre-id', timbreId);
+                mainSection.classList.remove('active');
+                intercomSection.classList.add('active');
+                feedbackMessage.innerText = '';
+                document.getElementById('name').value = '';
+                document.getElementById('message').value = '';
+            });
+        });
+
+        // Manejar clic en el botón VOLVER
+        backButton.addEventListener('click', () => {
+            console.log('Botón Volver clicado'); // Debug
+            intercomSection.classList.remove('active');
+            mainSection.classList.add('active');
+            feedbackMessage.innerText = '';
+        });
+
+        // Manejar clic en el botón TOCAR
+        ringButton.addEventListener('click', () => {
+            console.log('Botón TOCAR clicado'); // Debug
+            const timbreId = intercomSection.getAttribute('data-timbre-id');
+            const name = document.getElementById('name').value.trim();
+            const message = document.getElementById('message').value;
+
+            // Extraer piso y departamento del timbreId
+            let floor = 0;
+            let apartment = 'PB';
+
+            if (timbreId.startsWith('E')) {
+                floor = 'Encargado';
+                apartment = '';
+            } else {
+                const parts = timbreId.split('-');
+                floor = parts[0];
+                apartment = parts[1];
+            }
+
+            // Validar datos
+            if (floor === undefined || !apartment) {
+                feedbackMessage.innerText = 'No se puede enviar notificación al encargado.';
+                feedbackMessage.classList.remove('success');
+                feedbackMessage.classList.add('error');
+                console.log('Error: Faltan piso o departamento'); // Debug
+                return;
+            }
+
+            // Preparar el cuerpo de la solicitud
+            const requestBody = {
+                floor: floor === 'Encargado' ? undefined : floor,
+                apartment: floor === 'Encargado' ? 'Encargado' : apartment,
+                title: message ? `${intercomTitle.innerText} - ${message}` : intercomTitle.innerText,
+                body: name ? `${name} ha presionado el timbre.` : 'Alguien ha presionado el timbre.'
+            };
+
+            console.log('Enviando solicitud:', requestBody); // Debug
+
+            // Enviar la solicitud al backend
+            fetch('/api/notify', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(requestBody),
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Respuesta del servidor:', data); // Debug
+                if (data.message === 'Notificación enviada exitosamente.') {
+                    feedbackMessage.innerText = 'Notificación enviada correctamente.';
+                    feedbackMessage.classList.remove('error');
+                    feedbackMessage.classList.add('success');
+                    // Opcional: redirigir de vuelta después de un tiempo
+                    setTimeout(() => {
+                        backButton.click();
+                    }, 2000);
+                } else {
+                    feedbackMessage.innerText = `Error: ${data.message}`;
+                    feedbackMessage.classList.remove('success');
+                    feedbackMessage.classList.add('error');
+                }
+            })
+            .catch(error => {
+                console.error('Error al enviar la notificación:', error);
+                feedbackMessage.innerText = 'Error al enviar la notificación.';
+                feedbackMessage.classList.remove('success');
+                feedbackMessage.classList.add('error');
+            });
+        });
+    </script>
+</body>
+</html>
