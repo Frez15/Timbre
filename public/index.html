@@ -5,104 +5,198 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portero Eléctrico TimbrOn</title>
     <style>
-        /* Estilos Generales */
-        body, html {
+        /* Reset de márgenes y paddings */
+        * {
             margin: 0;
             padding: 0;
-            height: 100%;
-            font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
-        }
-
-        /* Contenedor Principal */
-        .container {
-            display: flex;
-            flex-direction: column;
-            align-items: center; /* Centra horizontalmente */
-            justify-content: center; /* Centra verticalmente */
-            height: 100vh;
-            padding: 20px;
             box-sizing: border-box;
         }
-
-        /* Sección Principal */
-        .main-section {
+        /* Establecer el tamaño mínimo para html y body */
+        html, body {
+            min-height: 100%;
             width: 100%;
-            max-width: 600px;
-            text-align: center;
+            overflow-x: hidden; /* Evita el desplazamiento horizontal */
         }
-
-        /* Sección de Intercom */
-        .intercom-section {
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Alinea al inicio para permitir scroll hacia abajo */
+            padding: 20px; /* Espaciado interno para evitar que el contenido toque los bordes */
+        }
+        .container {
             width: 100%;
-            max-width: 400px;
-            padding: 20px;
-            background-color: #ffffff;
-            border: 1px solid #ccc;
+            max-width: 1000px;
+            background-color: #fff;
+            padding: 20px 30px;
             border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            position: relative;
-            transition: all 0.3s ease-in-out;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh; /* Asegura que la container ocupe al menos la altura completa del viewport */
+            overflow: hidden; /* Evita que contenido interno se desborde */
         }
-
-        .hidden {
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        /* Grid de timbres por piso */
+        .floor {
+            margin-bottom: 20px;
+        }
+        .floor-title {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: #555;
+            background-color: #e9ecef;
+            padding: 8px 12px;
+            border-radius: 5px;
+            display: inline-block;
+        }
+        .timbres {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .timbre {
+            background-color: #007bff;
+            color: #fff;
+            padding: 15px 20px;
+            text-align: center;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            user-select: none;
+            flex: 1 1 calc(25% - 20px); /* Ajusta el tamaño según el número de timbres por piso */
+            max-width: calc(25% - 20px);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .timbre:hover {
+            background-color: #0056b3;
+        }
+        /* Sección de interacción con el timbre */
+        .intercom-section {
+            display: none;
+    flex-direction: column;
+    align-items: center;
+    transition: opacity 0.3s;
+    
+    /* Eliminado flex-grow: 1; */
+    
+    max-width: 500px; /* Ajusta según prefieras */
+    margin: 0 auto;    /* Centra horizontalmente */
+    
+    /* Opcional: width: 100%; */
+    overflow-y: auto;
+        }
+        .intercom-section.active {
+            display: flex;
+        }
+        /* Clase para ocultar la sección principal */
+        .main-section.hidden {
             display: none;
         }
-
-        .active {
-            display: block;
+        .intercom-title {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: #333;
+            text-align: center;
+            word-wrap: break-word;
+            background-color: #e9ecef;
+            padding: 10px 15px;
+            border-radius: 5px;
+            width: 100%;
+            max-width: 500px;
         }
-
-        /* Botones */
+        .form-group {
+            width: 100%;
+            margin-bottom: 15px;
+            max-width: 500px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: bold;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
         .buttons {
             display: flex;
-            justify-content: space-around;
+            gap: 15px;
             margin-top: 20px;
+            width: 100%;
+            justify-content: center;
+            max-width: 500px;
         }
-
         .button {
-            padding: 10px 20px;
+            padding: 12px 25px;
+            font-size: 1rem;
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            font-size: 16px;
+            transition: background-color 0.3s;
+            color: #fff;
         }
-
-        .ring {
-            background-color: #4CAF50; /* Verde */
-            color: white;
+        .button.ring {
+            background-color: #28a745;
         }
-
-        .back {
-            background-color: #f44336; /* Rojo */
-            color: white;
+        .button.ring:hover {
+            background-color: #218838;
         }
-
-        /* Mensajes */
+        .button.back {
+            background-color: #6c757d;
+        }
+        .button.back:hover {
+            background-color: #5a6268;
+        }
+        /* Mensajes de retroalimentación */
         .message {
-            margin-top: 20px;
-            font-size: 16px;
+            margin-top: 15px;
+            font-size: 1rem;
+            text-align: center;
+            max-width: 500px;
+            word-wrap: break-word;
         }
-
-        .success {
-            color: green;
+        .message.success {
+            color: #28a745;
         }
-
-        .error {
-            color: red;
+        .message.error {
+            color: #dc3545;
         }
-
         /* Loader */
         .loader {
-            margin-top: 20px;
-            font-size: 16px;
-            color: #333;
+            margin-top: 15px;
+            font-size: 1rem;
+            color: #007bff;
         }
-
         /* Responsive */
+        @media (max-width: 800px) {
+            .timbre {
+                flex: 1 1 calc(33.333% - 20px);
+                max-width: calc(33.333% - 20px);
+            }
+        }
         @media (max-width: 600px) {
-            .intercom-section, .main-section {
-                max-width: 90%;
+            .intercom-title {
+                font-size: 1.5rem;
+            }
+            .timbre {
+                flex: 1 1 calc(50% - 20px);
+                max-width: calc(50% - 20px);
+            }
+            .button {
+                padding: 10px 20px;
+                font-size: 0.9rem;
             }
         }
     </style>
@@ -120,21 +214,94 @@
                     <div class="timbre" data-timbre="PB-B">B</div>
                 </div>
             </div>
-            <!-- Pisos 1 al 8 -->
-            <!-- ... -->
+             <!-- Pisos 1 al 8 -->
+             <div class="floor" id="floor-1">
+                <div class="floor-title">PISO 1</div>
+                <div class="timbres">
+                    <div class="timbre" data-timbre="1-A">A</div>
+                    <div class="timbre" data-timbre="1-B">B</div>
+                    <div class="timbre" data-timbre="1-C">C</div>
+                    <div class="timbre" data-timbre="1-D">D</div>
+                </div>
+            </div>
+            <div class="floor" id="floor-2">
+                <div class="floor-title">PISO 2</div>
+                <div class="timbres">
+                    <div class="timbre" data-timbre="2-A">A</div>
+                    <div class="timbre" data-timbre="2-B">B</div>
+                    <div class="timbre" data-timbre="2-C">C</div>
+                    <div class="timbre" data-timbre="2-D">D</div>
+                </div>
+            </div>
+            <div class="floor" id="floor-3">
+                <div class="floor-title">PISO 3</div>
+                <div class="timbres">
+                    <div class="timbre" data-timbre="3-A">A</div>
+                    <div class="timbre" data-timbre="3-B">B</div>
+                    <div class="timbre" data-timbre="3-C">C</div>
+                    <div class="timbre" data-timbre="3-D">D</div>
+                </div>
+            </div>
+            <div class="floor" id="floor-4">
+                <div class="floor-title">PISO 4</div>
+                <div class="timbres">
+                    <div class="timbre" data-timbre="4-A">A</div>
+                    <div class="timbre" data-timbre="4-B">B</div>
+                    <div class="timbre" data-timbre="4-C">C</div>
+                </div>
+            </div>
+            <div class="floor" id="floor-5">
+                <div class="floor-title">PISO 5</div>
+                <div class="timbres">
+                    <div class="timbre" data-timbre="5-A">A</div>
+                    <div class="timbre" data-timbre="5-B">B</div>
+                    <div class="timbre" data-timbre="5-C">C</div>
+                </div>
+            </div>
+            <div class="floor" id="floor-6">
+                <div class="floor-title">PISO 6</div>
+                <div class="timbres">
+                    <div class="timbre" data-timbre="6-A">A</div>
+                    <div class="timbre" data-timbre="6-B">B</div>
+                    <div class="timbre" data-timbre="6-C">C</div>
+                </div>
+            </div>
+            <div class="floor" id="floor-7">
+                <div class="floor-title">PISO 7</div>
+                <div class="timbres">
+                    <div class="timbre" data-timbre="7-A">A</div>
+                    <div class="timbre" data-timbre="7-B">B</div>
+                    <div class="timbre" data-timbre="7-C">C</div>
+                </div>
+            </div>
+            <div class="floor" id="floor-8">
+                <div class="floor-title">PISO 8</div>
+                <div class="timbres">
+                    <div class="timbre" data-timbre="8-A">A</div>
+                    <div class="timbre" data-timbre="8-B">B</div>
+                    <div class="timbre" data-timbre="8-C">C</div>
+                </div>
+            </div>
+            <!-- Encargado E -->
+            <div class="floor" id="floor-E">
+                <div class="floor-title">Encargado</div>
+                <div class="timbres">
+                    <div class="timbre" data-timbre="E-Encargado">E</div>
+                </div>
+            </div>
         </div>
-
+        </div>
         <!-- Sección de Intercom -->
-        <div class="intercom-section hidden" id="intercom-section">
+        <div class="intercom-section" id="intercom-section">
             <h2 class="intercom-title" id="intercom-title">Timbre</h2>
             
             <div class="form-group">
                 <label for="name">INGRESE SU NOMBRE (opcional):</label>
-                <input type="text" id="name" placeholder="Nombre" style="width: 100%; padding: 8px; margin-top: 5px; box-sizing: border-box;">
+                <input type="text" id="name" placeholder="Nombre">
             </div>
             <div class="form-group">
                 <label for="app-message">Mensaje desde la App:</label>
-                <div id="app-message" style="padding: 10px; border: 1px solid #ccc; border-radius: 5px; width: 100%; min-height: 40px; background-color: #f8f9fa; margin-top: 5px;">
+                <div id="app-message" style="padding: 10px; border: 1px solid #ccc; border-radius: 5px; width: 100%; min-height: 40px; background-color: #f8f9fa;">
                     <!-- El mensaje desde la app aparecerá aquí -->
                 </div>
             </div>
@@ -145,250 +312,251 @@
             <div class="message" id="feedback-message"></div>
             <div class="loader" id="loader" style="display:none;">Enviando notificación...</div>
         </div>
-    </div>
+        <script>
+            // Obtener referencias a elementos del DOM
+            const mainSection = document.getElementById('main-section');
+            const intercomSection = document.getElementById('intercom-section');
+            const intercomTitle = document.getElementById('intercom-title');
+            const ringButton = document.getElementById('ring-button');
+            const backButton = document.getElementById('back-button');
+            const feedbackMessage = document.getElementById('feedback-message');
+            const appMessageDiv = document.getElementById('app-message');
+            const loader = document.getElementById('loader');
 
-    <script>
-        // Obtener referencias a elementos del DOM
-        const mainSection = document.getElementById('main-section');
-        const intercomSection = document.getElementById('intercom-section');
-        const intercomTitle = document.getElementById('intercom-title');
-        const ringButton = document.getElementById('ring-button');
-        const backButton = document.getElementById('back-button');
-        const feedbackMessage = document.getElementById('feedback-message');
-        const appMessageDiv = document.getElementById('app-message');
-        const loader = document.getElementById('loader');
+            // Variables para almacenar IDs de mensajes (si es necesario)
+            // const messageId = null; // Puedes implementar esto si deseas manejar mensajes individuales
 
-        // Manejar clics en los timbres
-        const timbreElements = document.querySelectorAll('.timbre');
-        timbreElements.forEach(timbre => {
-            timbre.addEventListener('click', () => {
-                const timbreId = timbre.getAttribute('data-timbre');
-                console.log(`Timbre clicado: ${timbreId}`); // Debug
+            // Manejar clics en los timbres
+            const timbreElements = document.querySelectorAll('.timbre');
+            timbreElements.forEach(timbre => {
+                timbre.addEventListener('click', () => {
+                    const timbreId = timbre.getAttribute('data-timbre');
+                    console.log(`Timbre clicado: ${timbreId}`); // Debug
 
-                // Extraer piso y departamento del timbreId
+                    // Extraer piso y departamento del timbreId
+                    const floor = getFloor(timbreId);
+                    const apartment = getApartment(timbreId);
+
+                    // Actualizar el título del intercom con piso y departamento
+                    intercomTitle.innerText = `Timbre ${floor} ${apartment}`;
+
+                    // Guardar el ID del timbre seleccionado
+                    intercomSection.setAttribute('data-timbre-id', timbreId);
+
+                    // Ocultar la sección principal y mostrar la sección de intercom
+                    mainSection.classList.add('hidden');
+                    intercomSection.classList.add('active');
+
+                    // Limpiar mensajes anteriores y mostrar "Esperando respuesta"
+                    feedbackMessage.innerText = '';
+                    appMessageDiv.innerText = 'Esperando respuesta'; // Mostrar "Esperando respuesta" al iniciar la solicitud
+                    document.getElementById('name').value = '';
+
+                    // Obtener el mensaje desde la app para este timbre
+                    fetch(`/api/get-message?floor=${encodeURIComponent(floor)}&apartment=${encodeURIComponent(apartment)}`)
+                        .then(response => {
+                            if (!response.ok) {
+                                if (response.status === 404) {
+                                    throw new Error('No hay mensajes desde la app.');
+                                } else {
+                                    throw new Error('Error al obtener el mensaje desde la app.');
+                                }
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            if (data.message) {
+                                appMessageDiv.innerText = data.message;
+                            } else {
+                                appMessageDiv.innerText = 'No hay mensajes desde la app.';
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error al obtener el mensaje desde la app:', error);
+                            // Cambiar el mensaje de error a "Esperando respuesta" según la solicitud del usuario
+                            appMessageDiv.innerText = 'Esperando respuesta';
+                        });
+                });
+            });
+
+            // Manejar clic en el botón VOLVER
+            backButton.addEventListener('click', () => {
+                console.log('Botón Volver clicado'); // Debug
+                intercomSection.classList.remove('active');
+                mainSection.classList.remove('hidden');
+                feedbackMessage.innerText = '';
+
+                // Obtener el ID del timbre seleccionado
+                const timbreId = intercomSection.getAttribute('data-timbre-id');
                 const floor = getFloor(timbreId);
                 const apartment = getApartment(timbreId);
 
-                // Actualizar el título del intercom con piso y departamento
-                intercomTitle.innerText = `Timbre ${floor} ${apartment}`;
-
-                // Guardar el ID del timbre seleccionado
-                intercomSection.setAttribute('data-timbre-id', timbreId);
-
-                // Ocultar la sección principal y mostrar la sección de intercom
-                mainSection.classList.add('hidden');
-                intercomSection.classList.remove('hidden'); // Mostrar intercom
-
-                // Limpiar mensajes anteriores y mostrar "Esperando respuesta"
-                feedbackMessage.innerText = '';
-                appMessageDiv.innerText = 'Esperando respuesta'; // Mostrar "Esperando respuesta" al iniciar la solicitud
-                document.getElementById('name').value = '';
-
-                // Obtener el mensaje desde la app para este timbre
-                fetch(`/api/get-message?floor=${encodeURIComponent(floor)}&apartment=${encodeURIComponent(apartment)}`)
-                    .then(response => {
-                        if (!response.ok) {
-                            if (response.status === 404) {
-                                throw new Error('No hay mensajes desde la app.');
-                            } else {
-                                throw new Error('Error al obtener el mensaje desde la app.');
-                            }
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        if (data.message) {
-                            appMessageDiv.innerText = data.message;
-                        } else {
-                            appMessageDiv.innerText = 'No hay mensajes desde la app.';
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error al obtener el mensaje desde la app:', error);
-                        // Cambiar el mensaje de error a "Esperando respuesta" según la solicitud del usuario
-                        appMessageDiv.innerText = 'Esperando respuesta';
-                    });
-            });
-        });
-
-        // Manejar clic en el botón VOLVER
-        backButton.addEventListener('click', () => {
-            console.log('Botón Volver clicado'); // Debug
-            intercomSection.classList.add('hidden');
-            mainSection.classList.remove('hidden');
-            feedbackMessage.innerText = '';
-
-            // Obtener el ID del timbre seleccionado
-            const timbreId = intercomSection.getAttribute('data-timbre-id');
-            const floor = getFloor(timbreId);
-            const apartment = getApartment(timbreId);
-
-            // Eliminar el mensaje pendiente
-            fetch('/api/delete-message', {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ floor, apartment }),
-            })
-            .then(response => {
-                if (!response.ok) {
-                    return response.json().then(errData => {
-                        throw new Error(errData.message || 'Error al eliminar el mensaje pendiente.');
-                    });
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log('Mensaje pendiente eliminado:', data);
-            })
-            .catch(error => {
-                console.error('Error al eliminar el mensaje pendiente:', error);
-                // Opcional: Mostrar un mensaje de error al usuario
-            });
-        });
-
-        // Manejar clic en el botón TOCAR
-        ringButton.addEventListener('click', () => {
-            console.log('Botón TOCAR clicado'); // Debug
-            const timbreId = intercomSection.getAttribute('data-timbre-id');
-            const name = document.getElementById('name').value.trim();
-
-            // Extraer piso y departamento del timbreId
-            let floor;
-            let apartment;
-            if (timbreId.startsWith('E')) {
-                floor = 'Encargado';
-                apartment = 'Encargado';
-            } else {
-                const parts = timbreId.split('-');
-                floor = parts[0];
-                apartment = parts[1];
-            }
-
-            // Validar datos
-            if (!floor || !apartment) {
-                feedbackMessage.innerText = 'No se puede enviar notificación al encargado.';
-                feedbackMessage.classList.remove('success');
-                feedbackMessage.classList.add('error');
-                console.log('Error: Faltan piso o departamento'); // Debug
-                return;
-            }
-
-            // Preparar el cuerpo de la solicitud
-            const sender = 'remitente@example.com'; // Reemplaza con la identificación real del remitente (por ejemplo, email del usuario actual)
-            const receiver = 'receptor@example.com'; // Reemplaza con la identificación real del receptor
-
-            const requestBody = {
-                floor: floor === 'Encargado' ? 'Encargado' : floor, // Asegúrate de enviar como String
-                apartment: apartment,
-                sender: sender,
-                receiver: receiver,
-                title: `Timbre ${floor}-${apartment} Presionado`,
-                body: name ? `${name} ha presionado el timbre.` : 'Alguien ha presionado el timbre.'
-            };
-
-            console.log('Enviando solicitud:', requestBody); // Debug
-
-            // Mostrar loader
-            loader.style.display = 'block';
-            feedbackMessage.innerText = '';
-            
-            // Enviar la solicitud para crear el mensaje pendiente
-            fetch('/api/create-message', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    floor: requestBody.floor,
-                    apartment: requestBody.apartment,
-                    sender: requestBody.sender,
-                    receiver: requestBody.receiver,
-                    message: requestBody.body
-                }),
-            })
-            .then(response => {
-                if (!response.ok) {
-                    return response.json().then(errData => {
-                        throw new Error(errData.message || 'Error al crear el mensaje pendiente.');
-                    });
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log('Mensaje pendiente creado:', data);
-                // Opcional: Puedes almacenar el ID del mensaje si lo necesitas
-            })
-            .catch(error => {
-                console.error('Error al crear el mensaje pendiente:', error);
-                feedbackMessage.innerText = 'Error al iniciar la comunicación.';
-                feedbackMessage.classList.add('error');
-                loader.style.display = 'none';
+                // Eliminar el mensaje pendiente
+                fetch('/api/delete-message', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ floor, apartment }),
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(errData => {
+                            throw new Error(errData.message || 'Error al eliminar el mensaje pendiente.');
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Mensaje pendiente eliminado:', data);
+                })
+                .catch(error => {
+                    console.error('Error al eliminar el mensaje pendiente:', error);
+                    // Opcional: Mostrar un mensaje de error al usuario
+                });
             });
 
-            // Enviar la notificación al receptor
-            fetch('/api/notify', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    floor: requestBody.floor,
-                    apartment: requestBody.apartment,
-                    title: requestBody.title,
-                    body: requestBody.body,
-                }),
-            })
-            .then(response => {
-                if (!response.ok) {
-                    return response.json().then(errData => {
-                        throw new Error(errData.message || 'Error al enviar la notificación.');
-                    });
-                }
-                return response.json();
-            })
-            .then(data => {
-                // Ocultar loader
-                loader.style.display = 'none';
-                console.log('Respuesta del servidor:', data); // Debug
-                if (data.message === 'Notificación enviada exitosamente.') {
-                    feedbackMessage.innerText = 'Notificación enviada correctamente.';
-                    feedbackMessage.classList.remove('error');
-                    feedbackMessage.classList.add('success');
-                    // Eliminar la redirección automática para mantener el intercom abierto
-                    // setTimeout(() => {
-                    //     backButton.click();
-                    // }, 2000);
+            // Manejar clic en el botón TOCAR
+            ringButton.addEventListener('click', () => {
+                console.log('Botón TOCAR clicado'); // Debug
+                const timbreId = intercomSection.getAttribute('data-timbre-id');
+                const name = document.getElementById('name').value.trim();
+
+                // Extraer piso y departamento del timbreId
+                let floor;
+                let apartment;
+                if (timbreId.startsWith('E')) {
+                    floor = 'Encargado';
+                    apartment = 'Encargado';
                 } else {
-                    feedbackMessage.innerText = `Error: ${data.message}`;
+                    const parts = timbreId.split('-');
+                    floor = parts[0];
+                    apartment = parts[1];
+                }
+
+                // Validar datos
+                if (!floor || !apartment) {
+                    feedbackMessage.innerText = 'No se puede enviar notificación al encargado.';
                     feedbackMessage.classList.remove('success');
                     feedbackMessage.classList.add('error');
+                    console.log('Error: Faltan piso o departamento'); // Debug
+                    return;
                 }
-            })
-            .catch(error => {
-                // Ocultar loader
-                loader.style.display = 'none';
-                console.error('Error al enviar la notificación:', error);
-                feedbackMessage.innerText = `Error: ${error.message}`;
-                feedbackMessage.classList.remove('success');
-                feedbackMessage.classList.add('error');
+
+                // Preparar el cuerpo de la solicitud
+                const sender = 'remitente@example.com'; // Reemplaza con la identificación real del remitente (por ejemplo, email del usuario actual)
+                const receiver = 'receptor@example.com'; // Reemplaza con la identificación real del receptor
+
+                const requestBody = {
+                    floor: floor === 'Encargado' ? 'Encargado' : floor, // Asegúrate de enviar como String
+                    apartment: apartment,
+                    sender: sender,
+                    receiver: receiver,
+                    title: `Timbre ${floor}-${apartment} Presionado`,
+                    body: name ? `${name} ha presionado el timbre.` : 'Alguien ha presionado el timbre.'
+                };
+
+                console.log('Enviando solicitud:', requestBody); // Debug
+
+                // Mostrar loader
+                loader.style.display = 'block';
+                feedbackMessage.innerText = '';
+                
+                // Enviar la solicitud para crear el mensaje pendiente
+                fetch('/api/create-message', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        floor: requestBody.floor,
+                        apartment: requestBody.apartment,
+                        sender: requestBody.sender,
+                        receiver: requestBody.receiver,
+                        message: requestBody.body
+                    }),
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(errData => {
+                            throw new Error(errData.message || 'Error al crear el mensaje pendiente.');
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Mensaje pendiente creado:', data);
+                    // Opcional: Puedes almacenar el ID del mensaje si lo necesitas
+                })
+                .catch(error => {
+                    console.error('Error al crear el mensaje pendiente:', error);
+                    feedbackMessage.innerText = 'Error al iniciar la comunicación.';
+                    feedbackMessage.classList.add('error');
+                    loader.style.display = 'none';
+                });
+
+                // Enviar la notificación al receptor
+                fetch('/api/notify', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        floor: requestBody.floor,
+                        apartment: requestBody.apartment,
+                        title: requestBody.title,
+                        body: requestBody.body,
+                    }),
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(errData => {
+                            throw new Error(errData.message || 'Error al enviar la notificación.');
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Ocultar loader
+                    loader.style.display = 'none';
+                    console.log('Respuesta del servidor:', data); // Debug
+                    if (data.message === 'Notificación enviada exitosamente.') {
+                        feedbackMessage.innerText = 'Notificación enviada correctamente.';
+                        feedbackMessage.classList.remove('error');
+                        feedbackMessage.classList.add('success');
+                        // Opcional: redirigir de vuelta después de un tiempo
+                        //   backButton.click();
+                       // }, 2000);
+                    } else {
+                        feedbackMessage.innerText = `Error: ${data.message}`;
+                        feedbackMessage.classList.remove('success');
+                        feedbackMessage.classList.add('error');
+                    }
+                })
+                .catch(error => {
+                    // Ocultar loader
+                    loader.style.display = 'none';
+                    console.error('Error al enviar la notificación:', error);
+                    feedbackMessage.innerText = `Error: ${error.message}`;
+                    feedbackMessage.classList.remove('success');
+                    feedbackMessage.classList.add('error');
+                });
             });
-        });
 
-        // Funciones auxiliares para extraer piso y departamento
-        function getFloor(timbreId) {
-            if (timbreId.startsWith('E')) return 'Encargado';
-            if (timbreId.startsWith('PB-')) return 'PB';
-            const match = timbreId.match(/^(\d+)-/);
-            return match ? match[1] : '';
-        }
+            // Funciones auxiliares para extraer piso y departamento
+            function getFloor(timbreId) {
+                if (timbreId.startsWith('E')) return 'Encargado';
+                if (timbreId.startsWith('PB-')) return 'PB';
+                const match = timbreId.match(/^(\d+)-/);
+                return match ? match[1] : '';
+            }
 
-        function getApartment(timbreId) {
-            if (timbreId.startsWith('E')) return 'Encargado';
-            const match = timbreId.match(/-(.+)$/);
-            return match ? match[1] : '';
-        }
-    </script>
+            function getApartment(timbreId) {
+                if (timbreId.startsWith('E')) return 'Encargado';
+                const match = timbreId.match(/-(.+)$/);
+                return match ? match[1] : '';
+            }
+        </script>
+    </div>
 </body>
 </html>
