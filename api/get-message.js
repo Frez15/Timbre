@@ -18,8 +18,8 @@ module.exports = async function handler(req, res) {
     }
 
     try {
-      // Buscar el mensaje por floor y apartment
-      const messageDoc = await Message.findOne({ floor: floor, apartment: apartment });
+      // Buscar el mensaje por floor y apartment con estado 'pending'
+      const messageDoc = await Message.findOne({ floor: floor, apartment: apartment, status: 'pending' });
 
       console.log('Mensaje encontrado:', messageDoc);
 
