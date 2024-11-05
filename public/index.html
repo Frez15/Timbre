@@ -38,6 +38,7 @@
             display: flex;
             flex-direction: column;
             min-height: 100vh; /* Asegura que la container ocupe al menos la altura completa del viewport */
+            overflow: hidden; /* Evita que contenido interno se desborde */
         }
 
         h1 {
@@ -100,6 +101,11 @@
 
         .intercom-section.active {
             display: flex;
+        }
+
+        /* Clase para ocultar la sección principal */
+        .main-section.hidden {
+            display: none;
         }
 
         .intercom-title {
@@ -224,7 +230,7 @@
 
     <div class="container">
         <!-- Sección Principal del Portero Eléctrico -->
-        <div class="main-section active" id="main-section">
+        <div class="main-section" id="main-section">
             <h1>Portero Eléctrico TimbrOn</h1>
             <!-- PB -->
             <div class="floor" id="floor-PB">
@@ -370,7 +376,7 @@
                     intercomSection.setAttribute('data-timbre-id', timbreId);
 
                     // Ocultar la sección principal y mostrar la sección de intercom
-                    mainSection.classList.remove('active');
+                    mainSection.classList.add('hidden');
                     intercomSection.classList.add('active');
 
                     // Limpiar mensajes anteriores
@@ -399,7 +405,7 @@
             backButton.addEventListener('click', () => {
                 console.log('Botón Volver clicado'); // Debug
                 intercomSection.classList.remove('active');
-                mainSection.classList.add('active');
+                mainSection.classList.remove('hidden');
                 feedbackMessage.innerText = '';
             });
 
