@@ -24,6 +24,18 @@
       "dest": "/api/notify.js"
     },
     {
+      "src": "/api/create-message",
+      "dest": "/api/create-message.js"
+    },
+    {
+      "src": "/api/delete-message",
+      "dest": "/api/delete-message.js"
+    },
+    {
+      "src": "/api/get-message",
+      "dest": "/api/get-message.js"
+    },
+    {
       "src": "/api/(.*)",
       "dest": "/api/$1.js"
     },
