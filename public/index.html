@@ -385,11 +385,11 @@
 
                     // Limpiar mensajes anteriores y mostrar "Esperando respuesta"
                     feedbackMessage.innerText = '';
-                    appMessageDiv.innerText = 'Esperando respuesta';
+                    appMessageDiv.innerText = 'Esperando respuesta'; // Mostrar "Esperando respuesta" al iniciar la solicitud
                     document.getElementById('name').value = '';
 
                     // Obtener el mensaje desde la app para este timbre
-                    fetch(`/api/get-message?floor=${getFloor(timbreId)}&apartment=${getApartment(timbreId)}`)
+                    fetch(`/api/get-message?floor=${encodeURIComponent(floor)}&apartment=${encodeURIComponent(apartment)}`)
                         .then(response => response.json())
                         .then(data => {
                             if (data.message) {
@@ -496,6 +496,7 @@
             // Funciones auxiliares para extraer piso y departamento
             function getFloor(timbreId) {
                 if (timbreId.startsWith('E')) return 'Encargado';
+                if (timbreId.startsWith('PB-')) return 'PB';
                 const match = timbreId.match(/^(\d+)-/);
                 return match ? match[1] : '';
             }
