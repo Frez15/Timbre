@@ -36,9 +36,23 @@ module.exports = async function handler(req, res) {
       return res.status(400).json({ message: 'Faltan piso o departamento.' });
     }
 
+    // Validaciones adicionales (opcional)
+    const validFloors = ['PB', '1', '2', '3', '4', '5', '6', '7', '8', 'Encargado'];
+    const validApartments = ['A', 'B', 'C', 'D']; // Ajusta según tus departamentos
+
+    if (!validFloors.includes(floor)) {
+      console.log('Piso inválido:', floor);
+      return res.status(400).json({ message: 'Piso inválido.' });
+    }
+
+    if (!validApartments.includes(apartment)) {
+      console.log('Departamento inválido:', apartment);
+      return res.status(400).json({ message: 'Departamento inválido.' });
+    }
+
     try {
-      // Buscar al usuario por piso y departamento
-      const user = await User.findOne({ floor: Number(floor), apartment });
+      // Buscar al usuario por piso y departamento usando floor como string
+      const user = await User.findOne({ floor: floor, apartment });
 
       console.log('Usuario encontrado:', user);
 
