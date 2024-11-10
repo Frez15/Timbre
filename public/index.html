@@ -81,16 +81,13 @@
         /* Sección de interacción con el timbre */
         .intercom-section {
             display: none;
-    flex-direction: column;
-    align-items: center;
-    transition: opacity 0.3s;
-    
-    /* Eliminado flex-grow: 1; */
-    
-    max-width: 500px; /* Ajusta según prefieras */
-    margin: 0 auto;    /* Centra horizontalmente */
-    width: 100%; 
-    overflow-y: auto;
+            flex-direction: column;
+            align-items: center;
+            transition: opacity 0.3s;
+            max-width: 500px; /* Ajusta según prefieras */
+            margin: 0 auto;    /* Centra horizontalmente */
+            width: 100%; 
+            overflow-y: auto;
         }
         .intercom-section.active {
             display: flex;
@@ -199,6 +196,9 @@
             }
         }
     </style>
+    <!-- Agregar los SDK de Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
     <div class="container">
@@ -311,251 +311,289 @@
             <div class="loader" id="loader" style="display:none;">Enviando notificación...</div>
         </div>
     </div>
-        <script>
-            // Obtener referencias a elementos del DOM
-            const mainSection = document.getElementById('main-section');
-            const intercomSection = document.getElementById('intercom-section');
-            const intercomTitle = document.getElementById('intercom-title');
-            const ringButton = document.getElementById('ring-button');
-            const backButton = document.getElementById('back-button');
-            const feedbackMessage = document.getElementById('feedback-message');
-            const appMessageDiv = document.getElementById('app-message');
-            const loader = document.getElementById('loader');
+    <!-- Inicializar Firebase y Firestore -->
+    <script>
+        // Tu web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBvqFN-_r1XQkf1jQEATHLKztu9EdijnkU",
+            authDomain: "timbre-152bf.firebaseapp.com",
+            projectId: "timbre-152bf",
+            storageBucket: "timbre-152bf.firebasestorage.app",
+            messagingSenderId: "228520068137",
+            appId: "1:228520068137:web:24ddcf1776e3e8743d0838",
+            measurementId: "G-0MMV8MMZBQ"
+        };
+        
+        // Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+    </script>
 
-            // Variables para almacenar IDs de mensajes (si es necesario)
-            // const messageId = null; // Puedes implementar esto si deseas manejar mensajes individuales
+    <!-- Script para manejar la lógica de la aplicación -->
+    <script>
+        // Obtener referencias a elementos del DOM
+        const mainSection = document.getElementById('main-section');
+        const intercomSection = document.getElementById('intercom-section');
+        const intercomTitle = document.getElementById('intercom-title');
+        const ringButton = document.getElementById('ring-button');
+        const backButton = document.getElementById('back-button');
+        const feedbackMessage = document.getElementById('feedback-message');
+        const appMessageDiv = document.getElementById('app-message');
+        const loader = document.getElementById('loader');
 
-            // Manejar clics en los timbres
-            const timbreElements = document.querySelectorAll('.timbre');
-            timbreElements.forEach(timbre => {
-                timbre.addEventListener('click', () => {
-                    const timbreId = timbre.getAttribute('data-timbre');
-                    console.log(`Timbre clicado: ${timbreId}`); // Debug
+        // Variable para almacenar la suscripción al listener de Firestore
+        let unsubscribeFirestoreListener = null;
 
-                    // Extraer piso y departamento del timbreId
-                    const floor = getFloor(timbreId);
-                    const apartment = getApartment(timbreId);
+        // Funciones auxiliares para extraer piso y departamento
+        function getFloor(timbreId) {
+            if (timbreId.startsWith('E')) return 'Encargado';
+            if (timbreId.startsWith('PB-')) return 'PB';
+            const match = timbreId.match(/^(\d+)-/);
+            return match ? match[1] : '';
+        }
 
-                    // Actualizar el título del intercom con piso y departamento
-                    intercomTitle.innerText = `Timbre ${floor} ${apartment}`;
+        function getApartment(timbreId) {
+            if (timbreId.startsWith('E')) return 'Encargado';
+            const match = timbreId.match(/-(.+)$/);
+            return match ? match[1] : '';
+        }
 
-                    // Guardar el ID del timbre seleccionado
-                    intercomSection.setAttribute('data-timbre-id', timbreId);
+        // Función para establecer un listener de Firestore para mensajes en tiempo real
+        function listenToMessages(floor, apartment) {
+            // Si ya hay un listener activo, desuscribirse
+            if (unsubscribeFirestoreListener) {
+                unsubscribeFirestoreListener();
+            }
 
-                    // Ocultar la sección principal y mostrar la sección de intercom
-                    mainSection.classList.add('hidden');
-                    intercomSection.classList.add('active');
+            // Crear una referencia a la colección 'messages'
+            const messagesRef = db.collection('messages');
 
-                    // Limpiar mensajes anteriores y mostrar "Esperando respuesta"
-                    feedbackMessage.innerText = '';
-                    appMessageDiv.innerText = 'Esperando respuesta'; // Mostrar "Esperando respuesta" al iniciar la solicitud
-                    document.getElementById('name').value = '';
+            // Crear una consulta filtrada por piso y departamento, ordenada por 'createdAt' descendente
+            const query = messagesRef
+                .where('floor', '==', floor)
+                .where('apartment', '==', apartment)
+                .orderBy('createdAt', 'desc')
+                .limit(1);
 
-                    // Obtener el mensaje desde la app para este timbre
-                    fetch(`/api/get-message?floor=${encodeURIComponent(floor)}&apartment=${encodeURIComponent(apartment)}`)
-                        .then(response => {
-                            if (!response.ok) {
-                                if (response.status === 404) {
-                                    throw new Error('No hay mensajes desde la app.');
-                                } else {
-                                    throw new Error('Error al obtener el mensaje desde la app.');
-                                }
-                            }
-                            return response.json();
-                        })
-                        .then(data => {
-                            if (data.message) {
-                                appMessageDiv.innerText = data.message;
-                            } else {
-                                appMessageDiv.innerText = 'No hay mensajes desde la app.';
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error al obtener el mensaje desde la app:', error);
-                            // Cambiar el mensaje de error a "Esperando respuesta" según la solicitud del usuario
-                            appMessageDiv.innerText = 'Esperando respuesta';
-                        });
-                });
+            // Establecer el listener
+            unsubscribeFirestoreListener = query.onSnapshot(snapshot => {
+                if (!snapshot.empty) {
+                    const doc = snapshot.docs[0];
+                    const data = doc.data();
+                    if (data.message) {
+                        appMessageDiv.innerText = data.message;
+                    } else {
+                        appMessageDiv.innerText = 'No hay mensajes desde la app.';
+                    }
+                } else {
+                    appMessageDiv.innerText = 'No hay mensajes desde la app.';
+                }
+            }, error => {
+                console.error('Error al escuchar los mensajes:', error);
+                appMessageDiv.innerText = 'Error al obtener mensajes.';
             });
+        }
 
-            // Manejar clic en el botón VOLVER
-            backButton.addEventListener('click', () => {
-                console.log('Botón Volver clicado'); // Debug
-                intercomSection.classList.remove('active');
-                mainSection.classList.remove('hidden');
-                feedbackMessage.innerText = '';
+        // Manejar clics en los timbres
+        const timbreElements = document.querySelectorAll('.timbre');
+        timbreElements.forEach(timbre => {
+            timbre.addEventListener('click', () => {
+                const timbreId = timbre.getAttribute('data-timbre');
+                console.log(`Timbre clicado: ${timbreId}`); // Debug
 
-                // Obtener el ID del timbre seleccionado
-                const timbreId = intercomSection.getAttribute('data-timbre-id');
+                // Extraer piso y departamento del timbreId
                 const floor = getFloor(timbreId);
                 const apartment = getApartment(timbreId);
 
-                // Eliminar el mensaje pendiente
-                fetch('/api/delete-message', {
-                    method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ floor, apartment }),
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        return response.json().then(errData => {
-                            throw new Error(errData.message || 'Error al eliminar el mensaje pendiente.');
-                        });
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('Mensaje pendiente eliminado:', data);
-                })
-                .catch(error => {
-                    console.error('Error al eliminar el mensaje pendiente:', error);
-                    // Opcional: Mostrar un mensaje de error al usuario
-                });
-            });
+                // Actualizar el título del intercom con piso y departamento
+                intercomTitle.innerText = `Timbre ${floor} ${apartment}`;
 
-            // Manejar clic en el botón TOCAR
-            ringButton.addEventListener('click', () => {
-                console.log('Botón TOCAR clicado'); // Debug
-                const timbreId = intercomSection.getAttribute('data-timbre-id');
-                const name = document.getElementById('name').value.trim();
+                // Guardar el ID del timbre seleccionado
+                intercomSection.setAttribute('data-timbre-id', timbreId);
 
-                // Extraer piso y departamento del timbreId
-                let floor;
-                let apartment;
-                if (timbreId.startsWith('E')) {
-                    floor = 'Encargado';
-                    apartment = 'Encargado';
-                } else {
-                    const parts = timbreId.split('-');
-                    floor = parts[0];
-                    apartment = parts[1];
-                }
+                // Ocultar la sección principal y mostrar la sección de intercom
+                mainSection.classList.add('hidden');
+                intercomSection.classList.add('active');
 
-                // Validar datos
-                if (!floor || !apartment) {
-                    feedbackMessage.innerText = 'No se puede enviar notificación al encargado.';
-                    feedbackMessage.classList.remove('success');
-                    feedbackMessage.classList.add('error');
-                    console.log('Error: Faltan piso o departamento'); // Debug
-                    return;
-                }
-
-                // Preparar el cuerpo de la solicitud
-                const sender = 'remitente@example.com'; // Reemplaza con la identificación real del remitente (por ejemplo, email del usuario actual)
-                const receiver = 'receptor@example.com'; // Reemplaza con la identificación real del receptor
-
-                const requestBody = {
-                    floor: floor === 'Encargado' ? 'Encargado' : floor, // Asegúrate de enviar como String
-                    apartment: apartment,
-                    sender: sender,
-                    receiver: receiver,
-                    title: `Timbre ${floor}-${apartment} Presionado`,
-                    body: name ? `${name} ha presionado el timbre.` : 'Alguien ha presionado el timbre.'
-                };
-
-                console.log('Enviando solicitud:', requestBody); // Debug
-
-                // Mostrar loader
-                loader.style.display = 'block';
+                // Limpiar mensajes anteriores y mostrar "Esperando respuesta"
                 feedbackMessage.innerText = '';
-                
-                // Enviar la solicitud para crear el mensaje pendiente
-                fetch('/api/create-message', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        floor: requestBody.floor,
-                        apartment: requestBody.apartment,
-                        sender: requestBody.sender,
-                        receiver: requestBody.receiver,
-                        message: requestBody.body
-                    }),
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        return response.json().then(errData => {
-                            throw new Error(errData.message || 'Error al crear el mensaje pendiente.');
-                        });
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('Mensaje pendiente creado:', data);
-                    // Opcional: Puedes almacenar el ID del mensaje si lo necesitas
-                })
-                .catch(error => {
-                    console.error('Error al crear el mensaje pendiente:', error);
-                    feedbackMessage.innerText = 'Error al iniciar la comunicación.';
-                    feedbackMessage.classList.add('error');
-                    loader.style.display = 'none';
-                });
+                appMessageDiv.innerText = 'Esperando respuesta'; // Mostrar "Esperando respuesta" al iniciar la solicitud
+                document.getElementById('name').value = '';
 
-                // Enviar la notificación al receptor
-                fetch('/api/notify', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        floor: requestBody.floor,
-                        apartment: requestBody.apartment,
-                        title: requestBody.title,
-                        body: requestBody.body,
-                    }),
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        return response.json().then(errData => {
-                            throw new Error(errData.message || 'Error al enviar la notificación.');
-                        });
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    // Ocultar loader
-                    loader.style.display = 'none';
-                    console.log('Respuesta del servidor:', data); // Debug
-                    if (data.message === 'Notificación enviada exitosamente.') {
-                        feedbackMessage.innerText = 'Notificación enviada correctamente.';
-                        feedbackMessage.classList.remove('error');
-                        feedbackMessage.classList.add('success');
-                        // Opcional: redirigir de vuelta después de un tiempo
-                        //   backButton.click();
-                       // }, 2000);
-                    } else {
-                        feedbackMessage.innerText = `Error: ${data.message}`;
-                        feedbackMessage.classList.remove('success');
-                        feedbackMessage.classList.add('error');
-                    }
-                })
-                .catch(error => {
-                    // Ocultar loader
-                    loader.style.display = 'none';
-                    console.error('Error al enviar la notificación:', error);
-                    feedbackMessage.innerText = `Error: ${error.message}`;
-                    feedbackMessage.classList.remove('success');
-                    feedbackMessage.classList.add('error');
-                });
+                // Establecer el listener de Firestore para este timbre
+                listenToMessages(floor, apartment);
+            });
+        });
+
+        // Manejar clic en el botón VOLVER
+        backButton.addEventListener('click', () => {
+            console.log('Botón Volver clicado'); // Debug
+            intercomSection.classList.remove('active');
+            mainSection.classList.remove('hidden');
+            feedbackMessage.innerText = '';
+
+            // Obtener el ID del timbre seleccionado
+            const timbreId = intercomSection.getAttribute('data-timbre-id');
+            const floor = getFloor(timbreId);
+            const apartment = getApartment(timbreId);
+
+            // Cancelar el listener de Firestore
+            if (unsubscribeFirestoreListener) {
+                unsubscribeFirestoreListener();
+                unsubscribeFirestoreListener = null;
+            }
+
+            // Eliminar el mensaje pendiente
+            fetch('/api/delete-message', {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ floor, apartment }),
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(errData => {
+                        throw new Error(errData.message || 'Error al eliminar el mensaje pendiente.');
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Mensaje pendiente eliminado:', data);
+            })
+            .catch(error => {
+                console.error('Error al eliminar el mensaje pendiente:', error);
+                // Opcional: Mostrar un mensaje de error al usuario
+            });
+        });
+
+        // Manejar clic en el botón TOCAR
+        ringButton.addEventListener('click', () => {
+            console.log('Botón TOCAR clicado'); // Debug
+            const timbreId = intercomSection.getAttribute('data-timbre-id');
+            const name = document.getElementById('name').value.trim();
+
+            // Extraer piso y departamento del timbreId
+            let floor;
+            let apartment;
+            if (timbreId.startsWith('E')) {
+                floor = 'Encargado';
+                apartment = 'Encargado';
+            } else {
+                const parts = timbreId.split('-');
+                floor = parts[0];
+                apartment = parts[1];
+            }
+
+            // Validar datos
+            if (!floor || !apartment) {
+                feedbackMessage.innerText = 'No se puede enviar notificación al encargado.';
+                feedbackMessage.classList.remove('success');
+                feedbackMessage.classList.add('error');
+                console.log('Error: Faltan piso o departamento'); // Debug
+                return;
+            }
+
+            // Preparar el cuerpo de la solicitud
+            const sender = 'remitente@example.com'; // Reemplaza con la identificación real del remitente (por ejemplo, email del usuario actual)
+            const receiver = 'receptor@example.com'; // Reemplaza con la identificación real del receptor
+
+            const requestBody = {
+                floor: floor === 'Encargado' ? 'Encargado' : floor, // Asegúrate de enviar como String
+                apartment: apartment,
+                sender: sender,
+                receiver: receiver,
+                title: `Timbre ${floor}-${apartment} Presionado`,
+                body: name ? `${name} ha presionado el timbre.` : 'Alguien ha presionado el timbre.'
+            };
+
+            console.log('Enviando solicitud:', requestBody); // Debug
+
+            // Mostrar loader
+            loader.style.display = 'block';
+            feedbackMessage.innerText = '';
+            
+            // Enviar la solicitud para crear el mensaje pendiente
+            fetch('/api/create-message', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    floor: requestBody.floor,
+                    apartment: requestBody.apartment,
+                    sender: requestBody.sender,
+                    receiver: requestBody.receiver,
+                    message: requestBody.body
+                }),
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(errData => {
+                        throw new Error(errData.message || 'Error al crear el mensaje pendiente.');
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Mensaje pendiente creado:', data);
+                // Opcional: Puedes almacenar el ID del mensaje si lo necesitas
+            })
+            .catch(error => {
+                console.error('Error al crear el mensaje pendiente:', error);
+                feedbackMessage.innerText = 'Error al iniciar la comunicación.';
+                feedbackMessage.classList.add('error');
+                loader.style.display = 'none';
             });
 
-            // Funciones auxiliares para extraer piso y departamento
-            function getFloor(timbreId) {
-                if (timbreId.startsWith('E')) return 'Encargado';
-                if (timbreId.startsWith('PB-')) return 'PB';
-                const match = timbreId.match(/^(\d+)-/);
-                return match ? match[1] : '';
-            }
+            // Enviar la notificación al receptor
+            fetch('/api/notify', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    floor: requestBody.floor,
+                    apartment: requestBody.apartment,
+                    title: requestBody.title,
+                    body: requestBody.body,
+                }),
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(errData => {
+                        throw new Error(errData.message || 'Error al enviar la notificación.');
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Ocultar loader
+                loader.style.display = 'none';
+                console.log('Respuesta del servidor:', data); // Debug
+                if (data.message === 'Notificación enviada exitosamente.') {
+                    feedbackMessage.innerText = 'Notificación enviada correctamente.';
+                    feedbackMessage.classList.remove('error');
+                    feedbackMessage.classList.add('success');
 
-            function getApartment(timbreId) {
-                if (timbreId.startsWith('E')) return 'Encargado';
-                const match = timbreId.match(/-(.+)$/);
-                return match ? match[1] : '';
-            }
-        </script>
-    </div>
+                    // Actualizar el mensaje inmediatamente en la interfaz web
+                    appMessageDiv.innerText = requestBody.body;
+                } else {
+                    feedbackMessage.innerText = `Error: ${data.message}`;
+                    feedbackMessage.classList.remove('success');
+                    feedbackMessage.classList.add('error');
+                }
+            })
+            .catch(error => {
+                // Ocultar loader
+                loader.style.display = 'none';
+                console.error('Error al enviar la notificación:', error);
+                feedbackMessage.innerText = `Error: ${error.message}`;
+                feedbackMessage.classList.remove('success');
+                feedbackMessage.classList.add('error');
+            });
+        });
+    </script>
 </body>
 </html>
