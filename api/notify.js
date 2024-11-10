@@ -1,55 +1,65 @@
-// Importar las dependencias necesarias
+// api/notify.js
+const dbConnect = require('./lib/mongodb');
+const User = require('./models/User');
 const admin = require('firebase-admin');
 
 // Inicializar Firebase Admin SDK
 if (!admin.apps.length) {
-  try {
-    const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
-
-    admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount),
-    });
-
-    console.log('Firebase Admin Initialized');
-  } catch (error) {
-    console.error('Error initializing Firebase Admin:', error);
-  }
+  admin.initializeApp({
+    credential: admin.credential.cert({
+      type: process.env.FIREBASE_TYPE,
+      project_id: process.env.FIREBASE_PROJECT_ID,
+      private_key_id: process.env.FIREBASE_PRIVATE_KEY_ID,
+      private_key: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+      client_email: process.env.FIREBASE_CLIENT_EMAIL,
+      client_id: process.env.FIREBASE_CLIENT_ID,
+      auth_uri: process.env.FIREBASE_AUTH_URI,
+      token_uri: process.env.FIREBASE_TOKEN_URI,
+      auth_provider_x509_cert_url: process.env.FIREBASE_AUTH_PROVIDER_CERT_URL,
+      client_x509_cert_url: process.env.FIREBASE_CLIENT_CERT_URL,
+    }),
+  });
 }
 
-const firestore = admin.firestore();
-
-// Exportar el handler de la función
 module.exports = async function handler(req, res) {
   if (req.method === 'POST') {
-    const { floor, apartment, sender, receiver, message } = req.body;
+    await dbConnect();
+    const { floor, apartment, title, body } = req.body;
 
-    // Validaciones básicas
-    if (!floor || !apartment || !sender || !receiver || !message) {
-      return res.status(400).json({ message: 'Faltan campos necesarios.' });
+    console.log('Received /api/notify request:', req.body);
+    // Validación de campos requeridos
+    if (!floor || !apartment) {
+      console.log('Faltan piso o departamento.');
+      return res.status(400).json({ message: 'Faltan piso o departamento.' });
     }
 
     try {
-      // Escribir el mensaje en Firestore
-      const firestoreMessage = {
-        floor,
-        apartment,
-        message,
-        sender,
-        receiver,
-        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      // Buscar al usuario por piso y departamento usando floor como string
+      const user = await User.findOne({ floor: floor, apartment });
+      console.log('Usuario encontrado:', user);
+      if (!user || !user.token) {
+        console.log('Usuario no encontrado o sin token.');
+        return res.status(404).json({ message: 'Usuario no encontrado o sin token.' });
+      }
+      // Crear el mensaje usando la nueva API de FCM
+      const message = {
+        notification: {
+          title: title || 'Timbre Presionado',
+          body: body || 'Alguien tocó el timbre.',
+        },
+        token: user.token,
       };
 
-      await firestore.collection('messages').add(firestoreMessage);
+      console.log('Enviando mensaje:', message);
+      // Enviar el mensaje
+      const response = await admin.messaging().send(message);
 
-      console.log('Mensaje guardado en Firestore:', firestoreMessage);
+      console.log('Respuesta de FCM:', response);
 
-      return res.status(201).json({
-        message: 'Mensaje pendiente creado exitosamente.',
-        data: firestoreMessage,
-      });
+      return res.status(200).json({ message: 'Notificación enviada exitosamente.', response });
     } catch (error) {
-      console.error('Error al crear el mensaje pendiente:', error);
-      return res.status(500).json({ message: 'Error al crear el mensaje pendiente.' });
+      console.error('Error al enviar la notificación:', error);
+      return res.status(500).json({ message: 'Error al enviar la notificación.', error: error.message });
     }
   } else {
     res.setHeader('Allow', ['POST']);
