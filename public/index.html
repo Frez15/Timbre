@@ -514,6 +514,9 @@
             loader.style.display = 'block';
             feedbackMessage.innerText = '';
             
+            // Mostrar el mensaje "Timbre tocado, esperando respuesta"
+            appMessageDiv.innerText = 'Timbre tocado, esperando respuesta';
+
             // Enviar la solicitud para crear el mensaje pendiente
             fetch('/api/create-message', {
                 method: 'POST',
@@ -576,9 +579,6 @@
                     feedbackMessage.innerText = 'Notificación enviada correctamente.';
                     feedbackMessage.classList.remove('error');
                     feedbackMessage.classList.add('success');
-
-                    // Actualizar el mensaje inmediatamente en la interfaz web
-                    appMessageDiv.innerText = requestBody.body;
                 } else {
                     feedbackMessage.innerText = `Error: ${data.message}`;
                     feedbackMessage.classList.remove('success');
